@@ -1,5 +1,4 @@
 import React from 'react';
-import compose from 'recompose/compose';
 import { withStyles } from '@material-ui/core/styles';
 import classNames from 'classnames';
 import { drawerWidth } from '../configs/conf';
@@ -12,6 +11,7 @@ import MainCurrency from '../routes/currencies/MainCurrency';
 import MainLanguage from '../routes/languages/MainLanguage';
 import MainLevel from '../routes/levels/MainLevel';
 import MainCategory from '../routes/categories/MainCategory';
+import MainSubCategory from '../routes/sub-categories/MainSubCategory';
 
 import Login from '../components/Login';
 import PrivateRoute from '../components/PrivateRoute';
@@ -65,6 +65,7 @@ class ShakyMain extends React.PureComponent {
         <PrivateRoute path='/languages' component={MainLanguage} />
         <PrivateRoute path='/levels' component={MainLevel} />
         <PrivateRoute path='/categories' component={MainCategory} />
+        <PrivateRoute path='/sub-categories' component={MainSubCategory} />
         <Route path='/login' component={Login} />
       </main>
     )

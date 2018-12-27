@@ -49,7 +49,7 @@ class InstructorList extends React.PureComponent {
         text='Instructor List'
         onAdd={this.handleAdd}
         renderCell={this.renderCell}
-        fetchDataList={this.userService.getInstructors}
+        fetchDataList={this.userService.listInstructors}
         columns={this.columns}
         tableColumnExtensions={this.tableColumnExtensions}
       />

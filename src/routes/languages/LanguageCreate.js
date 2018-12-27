@@ -8,7 +8,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import CurrencyService from '../../apis/CurrencyService';
+import LanguageService from '../../apis/LanguageService';
 import Create from '../../components/Create';
 
 
@@ -31,21 +31,19 @@ const styles = theme => ({
 });
 
 
-class CurrencyCreate extends React.PureComponent {
-  currencyService = new CurrencyService();
+class LanguageCreate extends React.PureComponent {
+  languageService = new LanguageService();
   initialError = {
     code: '',
     name: '',
-    symbol: '',
-    symbol_native: '',
+    native_name: '',
     non_field_errors: '',
     detail: '',
   }
   state = {
     code: '',
     name: '',
-    symbol: '',
-    symbolNative: '',
+    nativeName: '',
     loading: false,
     error: {...this.initialError},
   };
@@ -58,11 +56,11 @@ class CurrencyCreate extends React.PureComponent {
 
   handleSave = () => {
     const { enqueueSnackbar } = this.props;
-    const { code, name, symbol, symbolNative } = this.state;
-    const data = { code, name, symbol, symbol_native: symbolNative };
+    const { code, name, nativeName } = this.state;
+    const data = { code, name, native_name: nativeName };
 
     this.setState({error: {...this.initialError}, loading: true});
-    this.currencyService.createCurrency(data)
+    this.languageService.createLangauge(data)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         this.handleBack();
@@ -95,8 +93,7 @@ class CurrencyCreate extends React.PureComponent {
       error,
       code,
       name,
-      symbol,
-      symbolNative,
+      nativeName,
       loading,
     } = this.state;
 
@@ -105,7 +102,7 @@ class CurrencyCreate extends React.PureComponent {
         onSave={this.handleSave} 
         onBack={this.handleBack} 
         loading={loading}
-        text='Create Currency'
+        text='Create Language'
       >
         <React.Fragment>
           {error.non_field_errors && (
@@ -151,32 +148,17 @@ class CurrencyCreate extends React.PureComponent {
           </FormControl>
 
           <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='symbol'>Symbol</InputLabel>
+            <InputLabel htmlFor='nativeName'>Native Name</InputLabel>
             <Input 
-              id='symbol' 
-              name='symbol' 
-              value={symbol}
+              id='nativeName' 
+              name='nativeName' 
+              value={nativeName}
               autoFocus
               onChange={this.handleChange} 
-              error={!!error.symbol}
+              error={!!error.native_name}
             />
-            {error.symbol && (
-              <FormHelperText error>{error.symbol}</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='symbolNative'>Symbol Native</InputLabel>
-            <Input 
-              id='symbolNative' 
-              name='symbolNative' 
-              value={symbolNative}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.symbol_native}
-            />
-            {error.symbol_native && (
-              <FormHelperText error>{error.symbol_native}</FormHelperText>
+            {error.native_name && (
+              <FormHelperText error>{error.native_name}</FormHelperText>
             )}
           </FormControl>
 
@@ -189,4 +171,4 @@ class CurrencyCreate extends React.PureComponent {
 export default compose(
   withStyles(styles, { withTheme: true }),
   withSnackbar,
-)(CurrencyCreate);
+)(LanguageCreate);

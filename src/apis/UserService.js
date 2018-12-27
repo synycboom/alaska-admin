@@ -1,7 +1,7 @@
 import BaseService from './BaseService';
 
 class UserService extends BaseService {
-  getInstructors = (currentPage, pageSize) => {
+  listInstructors = (currentPage, pageSize) => {
     return this.client.get('/admin-api/v1.0/users/instructor/', { 
       params: { page: currentPage, page_size: pageSize }
     })
@@ -9,13 +9,13 @@ class UserService extends BaseService {
       .catch(this.handleError);
   };
 
-  getInstructorDetail = (id) => {
+  getInstructor = (id) => {
     return this.client.get(`/admin-api/v1.0/users/${id}/instructor/`)
       .then(res => res.data)
       .catch(this.handleError);
   };
 
-  updateInstructorDetail = (id, formData) => {
+  updateInstructor = (id, formData) => {
     return this.client.put(`/admin-api/v1.0/users/${id}/instructor/`, formData, {
       headers: {
         'content-type': 'multipart/form-data'

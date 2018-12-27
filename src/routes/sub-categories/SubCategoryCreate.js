@@ -6,9 +6,11 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import CurrencyService from '../../apis/CurrencyService';
+import SubCategoryService from '../../apis/SubCategoryService';
 import Create from '../../components/Create';
 
 
@@ -31,24 +33,42 @@ const styles = theme => ({
 });
 
 
-class CurrencyCreate extends React.PureComponent {
-  currencyService = new CurrencyService();
+class SubCategoryCreate extends React.PureComponent {
+  subCategoryService = new SubCategoryService();
   initialError = {
-    code: '',
+    parent: '',
     name: '',
-    symbol: '',
-    symbol_native: '',
     non_field_errors: '',
     detail: '',
   }
   state = {
-    code: '',
+    parentCategories: [],
+    parent: '',
     name: '',
-    symbol: '',
-    symbolNative: '',
     loading: false,
     error: {...this.initialError},
   };
+
+  componentDidMount() {
+    this.setState({loading: true});
+    this.subCategoryService.listParentCategories()
+      .then(data => {
+        this.setState({parentCategories: data.results});
+      })
+      .catch(error => {
+        let newError = {};
+        
+        for (let key in error) {
+          if (error.hasOwnProperty(key)) {
+            newError[key] = error[key];  
+          }
+        }
+        this.setState({error: newError});
+      })
+      .then(() => {
+        this.setState({loading: false});
+      })
+  }
 
   handleChange = (event) => {
     this.setState({
@@ -58,11 +78,11 @@ class CurrencyCreate extends React.PureComponent {
 
   handleSave = () => {
     const { enqueueSnackbar } = this.props;
-    const { code, name, symbol, symbolNative } = this.state;
-    const data = { code, name, symbol, symbol_native: symbolNative };
+    const { name, parent } = this.state;
+    const data = { name, parent };
 
     this.setState({error: {...this.initialError}, loading: true});
-    this.currencyService.createCurrency(data)
+    this.subCategoryService.createSubCategory(data)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         this.handleBack();
@@ -93,11 +113,10 @@ class CurrencyCreate extends React.PureComponent {
     const { classes } = this.props;
     const {
       error,
-      code,
       name,
-      symbol,
-      symbolNative,
+      parent,
       loading,
+      parentCategories,
     } = this.state;
 
     return (
@@ -105,7 +124,7 @@ class CurrencyCreate extends React.PureComponent {
         onSave={this.handleSave} 
         onBack={this.handleBack} 
         loading={loading}
-        text='Create Currency'
+        text='Create Sub-Category'
       >
         <React.Fragment>
           {error.non_field_errors && (
@@ -119,19 +138,28 @@ class CurrencyCreate extends React.PureComponent {
               {error.detail}
             </Typography>
           )}
+          
+          <FormControl required fullWidth>
+            <InputLabel htmlFor='parent'>Parent Category</InputLabel>
+            <Select
+              value={parent}
+              onChange={this.handleChange}
+              inputProps={{ name: 'parent', id: 'parent' }}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='code'>Code</InputLabel>
-            <Input 
-              id='code' 
-              name='code' 
-              value={code}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.code}
-            />
-            {error.code && (
-              <FormHelperText error>{error.code}</FormHelperText>
+              {parentCategories.map(item => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.name}
+                </MenuItem>
+              ))}
+
+            </Select>
+
+            {error.parent && (
+              <FormHelperText error>{error.parent}</FormHelperText>
             )}
           </FormControl>
 
@@ -150,36 +178,6 @@ class CurrencyCreate extends React.PureComponent {
             )}
           </FormControl>
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='symbol'>Symbol</InputLabel>
-            <Input 
-              id='symbol' 
-              name='symbol' 
-              value={symbol}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.symbol}
-            />
-            {error.symbol && (
-              <FormHelperText error>{error.symbol}</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='symbolNative'>Symbol Native</InputLabel>
-            <Input 
-              id='symbolNative' 
-              name='symbolNative' 
-              value={symbolNative}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.symbol_native}
-            />
-            {error.symbol_native && (
-              <FormHelperText error>{error.symbol_native}</FormHelperText>
-            )}
-          </FormControl>
-
         </React.Fragment>
       </Create>
     );
@@ -189,4 +187,4 @@ class CurrencyCreate extends React.PureComponent {
 export default compose(
   withStyles(styles, { withTheme: true }),
   withSnackbar,
-)(CurrencyCreate);
+)(SubCategoryCreate);

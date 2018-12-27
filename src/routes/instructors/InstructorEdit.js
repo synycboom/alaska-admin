@@ -105,7 +105,7 @@ class InstructorEdit extends React.PureComponent {
     const { match: { params } } = this.props;
 
     this.setState({ loading: true });
-    this.userService.getInstructorDetail(params.id)
+    this.userService.getInstructor(params.id)
       .then(data => this.setState({
         email: data.email,
         fullName: data.full_name,
@@ -140,7 +140,7 @@ class InstructorEdit extends React.PureComponent {
     }
 
     this.setState({error: {...this.initialError}, loading: true});
-    this.userService.updateInstructorDetail(params.id, formData)
+    this.userService.updateInstructor(params.id, formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
       })

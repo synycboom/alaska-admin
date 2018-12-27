@@ -19,6 +19,7 @@ import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import LanguageIcon from '@material-ui/icons/Language';
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import CategoryIcon from '@material-ui/icons/Category';
+import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 
 import ListItemLink from './ListItemLink';
@@ -85,6 +86,7 @@ class ShakyDrawer extends React.PureComponent {
           <ListItemLink to='/languages' primary='Languages' icon={<LanguageIcon />} />
           <ListItemLink to='/levels' primary='Levels' icon={<TrendingUpIcon />} />
           <ListItemLink to='/categories' primary='Categories' icon={<CategoryIcon />} />
+          <ListItemLink to='/sub-categories' primary='Sub-categories' icon={<ViewModuleIcon />} />
           <ListItem button onClick={this.handleLogOut}>
             <ListItemIcon>
                 <PowerSettingsNewIcon />
