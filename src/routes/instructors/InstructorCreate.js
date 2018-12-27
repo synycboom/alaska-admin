@@ -104,7 +104,7 @@ class InstructorCreate extends React.PureComponent {
   }
 
   handleSave = () => {
-    const { enqueueSnackbar, history } = this.props;
+    const { enqueueSnackbar } = this.props;
     const { email, displayName, fullName, bio, file } = this.state;
     const formData = new FormData();
     

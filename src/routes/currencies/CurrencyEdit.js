@@ -10,7 +10,7 @@ import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import UserService from '../../apis/UserService';
+import CurrencyService from '../../apis/CurrencyService';
 import Edit from '../../components/Edit';
 
 
@@ -19,15 +19,6 @@ const styles = theme => ({
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2,
-  },
-  avatarContainer: {
-    width: 'fit-content',
-    cursor: 'pointer',
-  },
-  avatar: {
-    margin: theme.spacing.unit,
-    width: 100,
-    height: 100,
   },
   otherError: {
     color: theme.palette.error.main,
@@ -43,75 +34,38 @@ const styles = theme => ({
 
 
 class InstructorEdit extends React.PureComponent {
-  userService = new UserService();
+  currencyService = new CurrencyService();
   initialError = {
-    email: '',
-    full_name: '',
-    display_name: '',
-    bio: '',
-    image: '',
+    code: '',
+    name: '',
+    symbol: '',
+    symbol_native: '',
     non_field_errors: '',
     detail: '',
   }
   state = {
-    email: '',
-    fullName: '',
-    displayName: '',
-    bio: '',
-    image: '',
-    file: null,
+    code: '',
+    name: '',
+    symbol: '',
+    symbolNative: '',
     loading: false,
     error: {...this.initialError},
   };
 
-  onDrop = ([file]) => {
-    if (file) {
-      this.setState(prevState => {
-        this.revokeObjectUrl(prevState.file);
-        
-        return {
-          file: Object.assign(file, {
-            preview: URL.createObjectURL(file)
-          })
-        }
-      });
-    } else {
-      this.setState(prevState => {
-        this.revokeObjectUrl(prevState.file);
-
-        return {
-          file: null
-        };
-      });
-    }
-  }
-
-  revokeObjectUrl(file) {
-    if (file) {
-      URL.revokeObjectURL(file.preview);
-    }
-  }
-
   componentDidMount() {
     this.loadData();
-  }
-
-  componentWillUnmount() {
-    // Make sure to revoke the data uris to avoid memory leaks
-    this.revokeObjectUrl(this.state.file);
   }
 
   loadData() {
     const { match: { params } } = this.props;
 
     this.setState({ loading: true });
-    this.userService.getInstructorDetail(params.id)
+    this.currencyService.getCurrency(params.id)
       .then(data => this.setState({
-        email: data.email,
-        fullName: data.full_name,
-        displayName: data.display_name,
-        bio: data.bio,
-        image: data.image,
+        code: data.code,
+        name: data.name,
+        symbol: data.symbol,
+        symbolNative: data.symbol_native,
         loading: false,
       }))
       .catch(() => this.setState({ 
@@ -127,20 +81,11 @@ class InstructorEdit extends React.PureComponent {
 
   handleSave = () => {
     const { enqueueSnackbar, match: { params } } = this.props;
-    const { email, displayName, fullName, bio, file } = this.state;
-    const formData = new FormData();
-    
-    formData.append('email', email);
-    formData.append('display_name', displayName);
-    formData.append('full_name', fullName);
-    formData.append('bio', bio);
-
-    if (file) {
-      formData.append('image', file);
-    }
+    const { code, name, symbol, symbolNative } = this.state;
+    const data = { code, name, symbol, symbol_native: symbolNative };
 
     this.setState({error: {...this.initialError}, loading: true});
-    this.userService.updateInstructorDetail(params.id, formData)
+    this.currencyService.updateCurrency(params.id, data)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
       })
@@ -170,7 +115,7 @@ class InstructorEdit extends React.PureComponent {
     const { enqueueSnackbar, match: { params } } = this.props;
 
     this.setState({error: {...this.initialError}, loading: true});
-    this.userService.deleteInstructor(params.id)
+    this.currencyService.deleteCurrency(params.id)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         this.handleBack();
@@ -197,12 +142,10 @@ class InstructorEdit extends React.PureComponent {
     const { classes } = this.props;
     const {
       error,
-      file,
-      email,
-      fullName,
-      displayName,
-      bio,
-      image,
+      code,
+      name,
+      symbol,
+      symbolNative,
       loading,
     } = this.state;
 
@@ -212,32 +155,10 @@ class InstructorEdit extends React.PureComponent {
         onBack={this.handleBack} 
         onDelete={this.handleDelete} 
         loading={loading}
-        text='Edit Instructor'
-        confirmDeleteDetail='All files uploaded by this user will be gone.'
+        text='Edit Currency'
+        confirmDeleteDetail='All subscription, subscription plans, and orders will be gone.'
       >
         <React.Fragment>
-        
-          <div className={classes.avatarContainer}>
-            <Dropzone
-              accept='image/*'
-              maxFiles={1}
-              onDrop={this.onDrop}
-            >
-              {({getRootProps, getInputProps}) => (
-                <div {...getRootProps()}>
-                  <input {...getInputProps()} />
-                  <Avatar className={classes.avatar} src={file ? file.preview : image}> </Avatar>
-                </div>
-              )}
-            </Dropzone>
-
-            {error.image && (
-              <Typography variant='body1' className={classes.otherError}>
-                {error.image}
-              </Typography>
-            )}
-          </div>
-
           {error.non_field_errors && (
             <Typography variant='body1' className={classes.otherError}>
               {error.non_field_errors}
@@ -251,63 +172,65 @@ class InstructorEdit extends React.PureComponent {
           )}
 
           <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='email'>Email Address</InputLabel>
+            <InputLabel htmlFor='code'>Code</InputLabel>
             <Input 
-              id='email' 
-              name='email' 
-              autoComplete='email' 
-              value={email}
+              id='code' 
+              name='code' 
+              value={code}
               autoFocus
               onChange={this.handleChange} 
-              error={!!error.email}
+              error={!!error.code}
             />
-            {error.email && (
-              <FormHelperText error>{error.email}</FormHelperText>
+            {error.code && (
+              <FormHelperText error>{error.code}</FormHelperText>
             )}
           </FormControl>
 
           <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='fullName'>Full Name</InputLabel>
+            <InputLabel htmlFor='name'>Name</InputLabel>
             <Input 
-              id='fullName' 
-              name='fullName'
-              value={fullName}
+              id='name' 
+              name='name' 
+              value={name}
+              autoFocus
               onChange={this.handleChange} 
-              error={!!error.full_name}
+              error={!!error.name}
             />
-            {error.full_name && (
-              <FormHelperText error>{error.full_name}</FormHelperText>
+            {error.name && (
+              <FormHelperText error>{error.name}</FormHelperText>
             )}
           </FormControl>
 
-          <FormControl margin='normal' fullWidth>
-            <InputLabel htmlFor='displayName'>Display Name</InputLabel>
+          <FormControl margin='normal' required fullWidth>
+            <InputLabel htmlFor='symbol'>Symbol</InputLabel>
             <Input 
-              id='displayName' 
-              name='displayName'
-              value={displayName}
+              id='symbol' 
+              name='symbol' 
+              value={symbol}
+              autoFocus
               onChange={this.handleChange} 
-              error={!!error.display_name}
+              error={!!error.symbol}
             />
-            {error.display_name && (
-              <FormHelperText error>{error.display_name}</FormHelperText>
+            {error.symbol && (
+              <FormHelperText error>{error.symbol}</FormHelperText>
             )}
           </FormControl>
 
-          <FormControl margin='normal' fullWidth>
-            <InputLabel htmlFor='bio'>Bio</InputLabel>
+          <FormControl margin='normal' required fullWidth>
+            <InputLabel htmlFor='symbolNative'>Symbol Native</InputLabel>
             <Input 
-              id='bio' 
-              name='bio'
-              value={bio}
-              onChange={this.handleChange}
-              error={!!error.bio}
-              multiline
+              id='symbolNative' 
+              name='symbolNative' 
+              value={symbolNative}
+              autoFocus
+              onChange={this.handleChange} 
+              error={!!error.symbol_native}
             />
-            {error.bio && (
-              <FormHelperText error>{error.bio}</FormHelperText>
+            {error.symbol_native && (
+              <FormHelperText error>{error.symbol_native}</FormHelperText>
             )}
           </FormControl>
+
         </React.Fragment>
       </Edit>
     );

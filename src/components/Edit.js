@@ -58,6 +58,8 @@ class Edit extends React.PureComponent {
       text,
       children,
       loading,
+      confirmDeleteTitle,
+      confirmDeleteDetail,
     } = this.props;
 
     const {
@@ -89,8 +91,8 @@ class Edit extends React.PureComponent {
 
         <ConfirmDialog 
           open={openConfirmDialog}
-          title='Are you sure to delete ?'
-          description='All files uploaded by this user will be gone.'
+          title={confirmDeleteTitle}
+          description={confirmDeleteDetail}
           onClose={this.handleClose}
           onCancel={this.handleCancel}
           onOk={this.handleOk}
@@ -106,8 +108,15 @@ Edit.propTypes = {
   onDelete: PropTypes.func,
   onBack: PropTypes.func,
   text: PropTypes.string,
+  confirmDeleteTitle: PropTypes.string,
+  confirmDeleteDetail: PropTypes.string,
   children: PropTypes.element,
   loading: PropTypes.bool,
+}
+
+Edit.defaultProps = {
+  confirmDeleteTitle: 'Are you sure to delete ?',
+  confirmDeleteDetail: '',
 }
 
 export default withStyles(styles, { withTheme: true })(Edit);

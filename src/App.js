@@ -51,7 +51,7 @@ class App extends React.Component {
           horizontal: 'left',
         }}
         action={[
-          <Button color='secondary' size='small'>
+          <Button color='secondary' key='dismissButton' size='small'>
               Dismiss
           </Button>
         ]}
