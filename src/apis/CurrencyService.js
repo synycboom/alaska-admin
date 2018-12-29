@@ -9,6 +9,12 @@ class CurrencyService extends BaseService {
       .catch(this.handleError);
   };
 
+  listAllCurrencies = () => {
+    return this.client.get('/admin-api/v1.0/currencies/all/')
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+  
   getCurrency = (id) => {
     return this.client.get(`/admin-api/v1.0/currencies/${id}/`)
       .then(res => res.data)
