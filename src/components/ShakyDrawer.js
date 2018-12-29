@@ -5,11 +5,14 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
+import Collapse from '@material-ui/core/Collapse';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
 
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import DashboardIcon from '@material-ui/icons/Dashboard';
@@ -21,6 +24,7 @@ import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import CategoryIcon from '@material-ui/icons/Category';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
+import BookmarkIcon from '@material-ui/icons/Bookmark';
 
 import ListItemLink from './ListItemLink';
 
@@ -41,6 +45,9 @@ const styles = theme => ({
     padding: '0 8px',
     ...theme.mixins.toolbar,
     justifyContent: 'flex-end',
+  },
+  nested: {
+    paddingLeft: theme.spacing.unit * 4,
   },
 });
 
@@ -82,11 +89,15 @@ class ShakyDrawer extends React.PureComponent {
           <ListItemLink to='/dashboard' primary='Dashboard' icon={<DashboardIcon />} />
           <ListItemLink to='/instructors' primary='Instructors' icon={<AccessibilityIcon />} />
           <ListItemLink to='/subscription-plans' primary='Subscription Plans' icon={<FormatListBulletedIcon />} />
+          <Divider />
+          <ListItemLink to='/tags' primary='Tags' icon={<BookmarkIcon />} />
+          <Divider />
           <ListItemLink to='/currencies' primary='Currencies' icon={<AttachMoneyIcon />} />
           <ListItemLink to='/languages' primary='Languages' icon={<LanguageIcon />} />
           <ListItemLink to='/levels' primary='Levels' icon={<TrendingUpIcon />} />
           <ListItemLink to='/categories' primary='Categories' icon={<CategoryIcon />} />
           <ListItemLink to='/sub-categories' primary='Sub-categories' icon={<ViewModuleIcon />} />
+          <Divider />
           <ListItem button onClick={this.handleLogOut}>
             <ListItemIcon>
                 <PowerSettingsNewIcon />

@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Paper from '@material-ui/core/Paper';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
+import { withSnackbar } from 'notistack';
+import compose from 'recompose/compose';
 
 import {
   PagingState,
@@ -61,18 +63,18 @@ class List extends React.PureComponent {
 
   loadData = () => {
     const { pageSize, currentPage } = this.state;
-    const { fetchDataList } = this.props;
-    
+    const { fetchDataList, enqueueSnackbar } = this.props;
+
     fetchDataList(currentPage + 1, pageSize)
       .then(data => this.setState({
         rows: data.results,
         totalCount: data.count,
         loading: false,
       }))
-      .catch(() => this.setState({ 
-        loading: false 
-      }))
-
+      .catch((error) => {
+        this.setState({ loading: false });
+        enqueueSnackbar(error.detail, { variant: 'error' })
+      });
   };
 
   renderCell = (props) => {
@@ -141,4 +143,7 @@ List.propTypes = {
   tableColumnExtensions: PropTypes.array,
 }
 
-export default withStyles(styles, {withTheme: true})(List);
+export default compose(
+  withStyles(styles, { withTheme: true }),
+  withSnackbar,
+)(List);
