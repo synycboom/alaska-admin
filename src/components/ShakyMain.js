@@ -13,6 +13,7 @@ import MainLevel from '../routes/levels/MainLevel';
 import MainCategory from '../routes/categories/MainCategory';
 import MainSubCategory from '../routes/sub-categories/MainSubCategory';
 import MainTag from '../routes/tags/MainTag';
+import MainUploadedFile from '../routes/uploaded-files/MainUploadedFile';
 
 import Login from '../components/Login';
 import PrivateRoute from '../components/PrivateRoute';
@@ -68,6 +69,7 @@ class ShakyMain extends React.PureComponent {
         <PrivateRoute path='/categories' component={MainCategory} />
         <PrivateRoute path='/sub-categories' component={MainSubCategory} />
         <PrivateRoute path='/tags' component={MainTag} />
+        <PrivateRoute path='/uploaded-files' component={MainUploadedFile} />
         <Route path='/login' component={Login} />
       </main>
     )

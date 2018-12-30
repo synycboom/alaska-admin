@@ -9,6 +9,12 @@ class TagService extends BaseService {
       .catch(this.handleError);
   };
 
+  listAllTags = () => {
+    return this.client.get('/admin-api/v1.0/tags/all/')
+      .then(res => res.data)
+      .catch(this.handleError);
+  }
+
   getTag = (id) => {
     return this.client.get(`/admin-api/v1.0/tags/${id}/`)
       .then(res => res.data)

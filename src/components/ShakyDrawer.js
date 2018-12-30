@@ -5,14 +5,11 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
-import Collapse from '@material-ui/core/Collapse';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import ExpandMore from '@material-ui/icons/ExpandMore';
 
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import DashboardIcon from '@material-ui/icons/Dashboard';
@@ -25,6 +22,7 @@ import CategoryIcon from '@material-ui/icons/Category';
 import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import BookmarkIcon from '@material-ui/icons/Bookmark';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 
 import ListItemLink from './ListItemLink';
 
@@ -91,6 +89,7 @@ class ShakyDrawer extends React.PureComponent {
           <ListItemLink to='/subscription-plans' primary='Subscription Plans' icon={<FormatListBulletedIcon />} />
           <Divider />
           <ListItemLink to='/tags' primary='Tags' icon={<BookmarkIcon />} />
+          <ListItemLink to='/uploaded-files' primary='Files' icon={<FileCopyIcon />} />
           <Divider />
           <ListItemLink to='/currencies' primary='Currencies' icon={<AttachMoneyIcon />} />
           <ListItemLink to='/languages' primary='Languages' icon={<LanguageIcon />} />
