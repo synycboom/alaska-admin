@@ -23,6 +23,8 @@ import ViewModuleIcon from '@material-ui/icons/ViewModule';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import BookmarkIcon from '@material-ui/icons/Bookmark';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import ImageIcon from '@material-ui/icons/Image';
+import VideocamIcon from '@material-ui/icons/Videocam';
 
 import ListItemLink from './ListItemLink';
 
@@ -90,6 +92,8 @@ class ShakyDrawer extends React.PureComponent {
           <Divider />
           <ListItemLink to='/tags' primary='Tags' icon={<BookmarkIcon />} />
           <ListItemLink to='/uploaded-files' primary='Files' icon={<FileCopyIcon />} />
+          <ListItemLink to='/uploaded-images' primary='Images' icon={<ImageIcon />} />
+          <ListItemLink to='/uploaded-videos' primary='Videos' icon={<VideocamIcon />} />
           <Divider />
           <ListItemLink to='/currencies' primary='Currencies' icon={<AttachMoneyIcon />} />
           <ListItemLink to='/languages' primary='Languages' icon={<LanguageIcon />} />

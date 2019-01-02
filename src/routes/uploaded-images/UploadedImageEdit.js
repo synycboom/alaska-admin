@@ -1,7 +1,6 @@
 import React from 'react';
 import { withSnackbar } from 'notistack';
 import compose from 'recompose/compose';
-import Dropzone from 'react-dropzone';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -10,10 +9,10 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 
-import UploadedFileService from '../../apis/UploadedFileService';
+import UploadedImageService from '../../apis/UploadedImageService';
 import TagService from '../../apis/TagService';
 
-import Create from '../../components/Create';
+import Edit from '../../components/Edit';
 import MultipleSelectInput from '../../components/MultipleSelectInput';
 
 
@@ -26,14 +25,10 @@ const styles = theme => ({
   otherError: {
     color: theme.palette.error.main,
   },
-  dropzone: {
-    borderWidth: 2,
-    borderColor: '#666',
-    borderStyle: 'dashed',
-    borderRadius: 5,
-    cursor: 'pointer',
-    padding: 10,
-    marginTop: 20,
+  image: {
+    margin: theme.spacing.unit,
+    width: 240,
+    height: 135,
   },
   form: {
     width: '100%', // Fix IE 11 issue.
@@ -45,8 +40,8 @@ const styles = theme => ({
 });
 
 
-class UploadedFileCreate extends React.PureComponent {
-  uploadedFileService = new UploadedFileService();
+class UploadedImageEdit extends React.PureComponent {
+  uploadedImageService = new UploadedImageService();
   tagService = new TagService();
   initialError = {
     name: '',
@@ -57,7 +52,8 @@ class UploadedFileCreate extends React.PureComponent {
   }
   state = {
     name: '',
-    file: null,
+    originalImagePath: '',
+    blurredImagePath: '',
     tags: [],
     allTags: [],
     loading: false,
@@ -66,29 +62,40 @@ class UploadedFileCreate extends React.PureComponent {
 
   onDrop = ([file]) => {
     if (file) {
-      this.setState({ file });
+      this.setState(state => {
+        this.revokeObjectUrl(state.file);
+        
+        return {
+          file: Object.assign(file, {
+            preview: URL.createObjectURL(file)
+          })
+        }
+      });
     } else {
-      this.setState({ file: null });
+      this.setState(state => {
+        this.revokeObjectUrl(state.file);
+
+        return {
+          file: null
+        };
+      });
     }
   }
 
-  onCancelFile = () => {
-    this.setState({ file: null });
-  };
+  revokeObjectUrl(file) {
+    if (file) {
+      URL.revokeObjectURL(file.preview);
+    }
+  }
+
+  componentWillUnmount() {
+    // Make sure to revoke the data uris to avoid memory leaks
+    this.revokeObjectUrl(this.state.file);
+  }
 
   componentDidMount() {
     this.loadData();
   }
-
-  loadData = () => {
-    this.setState({ loading: true });
-    this.tagService.listAllTags()
-      .then(data => {
-        this.setState({ allTags: data.results });
-      })
-      .catch(this.catchError)
-      .then(() => this.setState({loading: false}));
-  };
 
   catchError = error => {
     let newError = {};
@@ -102,31 +109,59 @@ class UploadedFileCreate extends React.PureComponent {
     this.setState({error: newError});
   };
 
+  loadData() {
+    const { match: { params } } = this.props;
+
+    this.setState({ loading: true });
+    const promise1 = this.tagService.listAllTags()
+      .then(data => this.setState({ allTags: data.results }))
+      .catch(this.catchError);
+
+    const promise2 = this.uploadedImageService.getUploadedImage(params.id)
+      .then(data => this.setState({
+        name: data.name, 
+        originalImagePath: data.original_image, 
+        blurredImagePath: data.blurred_image, 
+        tags: data.tags,
+      }))
+      .catch(this.catchError);
+
+    Promise.all([promise1, promise2])
+      .then(() => null)
+      .catch(() => null)
+      .then(() => this.setState({loading: false}));
+  }
+
   handleChange = (event) => {
     this.setState({
       [event.target.name]: event.target.value
-    });
+    })
   }
 
   handleSave = () => {
-    const { enqueueSnackbar } = this.props;
-    const { name, file, tags } = this.state;
+    const { enqueueSnackbar, match: { params } } = this.props;
+    const { name, tags } = this.state;
     const formData = new FormData();
     
     formData.append('name', name);
     formData.append('tags', tags.map(item => item.value));
 
-    if (file) {
-      formData.append('file', file);
-    }
-
     this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedFileService.createUploadedFile(formData)
+    this.uploadedImageService.updateUploadedImage(params.id, formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
-        this.handleBack();
       })
-      .catch(this.catchError)
+      .catch(error => {
+        let newError = {};
+        
+        for (let key in error) {
+          if (error.hasOwnProperty(key)) {
+            newError[key] = error[key];  
+          }
+        }
+        
+        this.setState({error: newError});
+      })
       .then(() => {
         this.setState({ 
           loading: false 
@@ -138,23 +173,53 @@ class UploadedFileCreate extends React.PureComponent {
     this.props.history.goBack();
   }
   
+  handleDelete = () => {
+    const { enqueueSnackbar, match: { params } } = this.props;
+
+    this.setState({error: {...this.initialError}, loading: true});
+    this.uploadedImageService.deleteUploadedImage(params.id)
+      .then(data => {
+        enqueueSnackbar(data.detail, { variant: 'success' });
+        this.handleBack();
+      })
+      .catch(error => {
+        let newError = {};
+        
+        for (let key in error) {
+          if (error.hasOwnProperty(key)) {
+            newError[key] = error[key];  
+          }
+        }
+        
+        this.setState({error: newError});
+      })
+      .then(() => {
+        this.setState({ 
+          loading: false 
+        });
+      })
+  }
+
   render() {
     const { classes } = this.props;
     const {
       error,
       name,
-      file,
       tags,
       allTags,
+      originalImagePath,
+      blurredImagePath,
       loading,
     } = this.state;
 
     return (
-      <Create 
-        onSave={this.handleSave} 
-        onBack={this.handleBack} 
+      <Edit 
+        onSave={this.handleSave}
+        onBack={this.handleBack}
+        onDelete={this.handleDelete} 
         loading={loading}
-        text='Upload File'
+        text='Edit Uploaded Image'
+        confirmDeleteDetail="Model's fields that has this file will be set to null"
       >
         <React.Fragment>
           {error.non_field_errors && (
@@ -192,33 +257,25 @@ class UploadedFileCreate extends React.PureComponent {
             onChange={this.handleChange}
           />
 
-          <div>
-            <Dropzone
-              maxFiles={1}
-              onDrop={this.onDrop}
-              onFileDialogCancel={this.onCancelFile}
-            >
-              {({getRootProps, getInputProps}) => (
-                <div {...getRootProps()} className={classes.dropzone}>
-                  <input {...getInputProps()} />
-                  <p>Drop a file here, or click to select a file</p>
-                </div>
-              )}
-            </Dropzone>
+          <p>Original Image</p>
+          <img
+            className={classes.image}
+            src={originalImagePath}
+          />
 
-            {file && (
-              <h4>File: {`${file.name} ${file.size} bytes`}</h4>
-            )}
-            
-          </div>
+          <p>Blurred Image</p>
+          <img
+            className={classes.image}
+            src={blurredImagePath}
+          />
 
-          {error.file && (
+          {error.image && (
             <Typography variant='body1' className={classes.otherError}>
-              {error.file}
+              {error.image}
             </Typography>
           )}
         </React.Fragment>
-      </Create>
+      </Edit>
     );
   }
 }
@@ -226,4 +283,4 @@ class UploadedFileCreate extends React.PureComponent {
 export default compose(
   withStyles(styles, { withTheme: true }),
   withSnackbar,
-)(UploadedFileCreate);
+)(UploadedImageEdit);

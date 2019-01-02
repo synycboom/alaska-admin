@@ -201,8 +201,6 @@ class MultipleSelectInput extends React.Component {
       label, 
       options, 
       value, 
-      onChange, 
-      name,
       placeholder, 
     } = this.props;
 

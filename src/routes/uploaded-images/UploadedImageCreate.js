@@ -10,7 +10,7 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 
-import UploadedFileService from '../../apis/UploadedFileService';
+import UploadedImageService from '../../apis/UploadedImageService';
 import TagService from '../../apis/TagService';
 
 import Create from '../../components/Create';
@@ -27,13 +27,13 @@ const styles = theme => ({
     color: theme.palette.error.main,
   },
   dropzone: {
-    borderWidth: 2,
-    borderColor: '#666',
-    borderStyle: 'dashed',
-    borderRadius: 5,
+    width: 'fit-content',
     cursor: 'pointer',
-    padding: 10,
-    marginTop: 20,
+  },
+  image: {
+    margin: theme.spacing.unit,
+    width: 240,
+    height: 135,
   },
   form: {
     width: '100%', // Fix IE 11 issue.
@@ -45,8 +45,8 @@ const styles = theme => ({
 });
 
 
-class UploadedFileCreate extends React.PureComponent {
-  uploadedFileService = new UploadedFileService();
+class UploadedImageCreate extends React.PureComponent {
+  uploadedImageService = new UploadedImageService();
   tagService = new TagService();
   initialError = {
     name: '',
@@ -66,15 +66,36 @@ class UploadedFileCreate extends React.PureComponent {
 
   onDrop = ([file]) => {
     if (file) {
-      this.setState({ file });
+      this.setState(state => {
+        this.revokeObjectUrl(state.file);
+        
+        return {
+          file: Object.assign(file, {
+            preview: URL.createObjectURL(file)
+          })
+        }
+      });
     } else {
-      this.setState({ file: null });
+      this.setState(state => {
+        this.revokeObjectUrl(state.file);
+
+        return {
+          file: null
+        };
+      });
     }
   }
 
-  onCancelFile = () => {
-    this.setState({ file: null });
-  };
+  revokeObjectUrl(file) {
+    if (file) {
+      URL.revokeObjectURL(file.preview);
+    }
+  }
+
+  componentWillUnmount() {
+    // Make sure to revoke the data uris to avoid memory leaks
+    this.revokeObjectUrl(this.state.file);
+  }
 
   componentDidMount() {
     this.loadData();
@@ -121,17 +142,13 @@ class UploadedFileCreate extends React.PureComponent {
     }
 
     this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedFileService.createUploadedFile(formData)
+    this.uploadedImageService.createUploadedImage(formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         this.handleBack();
       })
       .catch(this.catchError)
-      .then(() => {
-        this.setState({ 
-          loading: false 
-        });
-      })
+      .then(() => this.setState({ loading: false }));
   }
 
   handleBack = () => {
@@ -154,7 +171,7 @@ class UploadedFileCreate extends React.PureComponent {
         onSave={this.handleSave} 
         onBack={this.handleBack} 
         loading={loading}
-        text='Upload File'
+        text='Upload Image'
       >
         <React.Fragment>
           {error.non_field_errors && (
@@ -194,6 +211,7 @@ class UploadedFileCreate extends React.PureComponent {
 
           <div>
             <Dropzone
+              accept='image/*'
               maxFiles={1}
               onDrop={this.onDrop}
               onFileDialogCancel={this.onCancelFile}
@@ -201,7 +219,10 @@ class UploadedFileCreate extends React.PureComponent {
               {({getRootProps, getInputProps}) => (
                 <div {...getRootProps()} className={classes.dropzone}>
                   <input {...getInputProps()} />
-                  <p>Drop a file here, or click to select a file</p>
+                  <img
+                    className={classes.image}
+                    src={file ? file.preview : ''}
+                  />
                 </div>
               )}
             </Dropzone>
@@ -209,7 +230,7 @@ class UploadedFileCreate extends React.PureComponent {
             {file && (
               <h4>File: {`${file.name} ${file.size} bytes`}</h4>
             )}
-            
+
           </div>
 
           {error.file && (
@@ -226,4 +247,4 @@ class UploadedFileCreate extends React.PureComponent {
 export default compose(
   withStyles(styles, { withTheme: true }),
   withSnackbar,
-)(UploadedFileCreate);
+)(UploadedImageCreate);

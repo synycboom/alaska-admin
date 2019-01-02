@@ -9,6 +9,7 @@
     "@material-ui/core": "^3.7.1",
     "@material-ui/icons": "^3.0.1",
     "axios": "^0.18.0",
+    "hls.js": "^0.12.2",
     "notistack": "^0.4.1",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",

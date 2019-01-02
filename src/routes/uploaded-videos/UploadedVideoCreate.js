@@ -10,12 +10,12 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 
-import UploadedFileService from '../../apis/UploadedFileService';
+import UploadedVideoService from '../../apis/UploadedVideoService';
 import TagService from '../../apis/TagService';
 
 import Create from '../../components/Create';
 import MultipleSelectInput from '../../components/MultipleSelectInput';
-
+import { formatBytes } from '../../utils/file';
 
 const styles = theme => ({
   paper: {
@@ -45,8 +45,8 @@ const styles = theme => ({
 });
 
 
-class UploadedFileCreate extends React.PureComponent {
-  uploadedFileService = new UploadedFileService();
+class UploadedVideoCreate extends React.PureComponent {
+  uploadedVideoService = new UploadedVideoService();
   tagService = new TagService();
   initialError = {
     name: '',
@@ -121,17 +121,13 @@ class UploadedFileCreate extends React.PureComponent {
     }
 
     this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedFileService.createUploadedFile(formData)
+    this.uploadedVideoService.createUploadedVideo(formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         this.handleBack();
       })
       .catch(this.catchError)
-      .then(() => {
-        this.setState({ 
-          loading: false 
-        });
-      })
+      .then(() => this.setState({ loading: false }));
   }
 
   handleBack = () => {
@@ -154,7 +150,7 @@ class UploadedFileCreate extends React.PureComponent {
         onSave={this.handleSave} 
         onBack={this.handleBack} 
         loading={loading}
-        text='Upload File'
+        text='Upload Video'
       >
         <React.Fragment>
           {error.non_field_errors && (
@@ -194,6 +190,7 @@ class UploadedFileCreate extends React.PureComponent {
 
           <div>
             <Dropzone
+              accept='video/*'
               maxFiles={1}
               onDrop={this.onDrop}
               onFileDialogCancel={this.onCancelFile}
@@ -207,16 +204,15 @@ class UploadedFileCreate extends React.PureComponent {
             </Dropzone>
 
             {file && (
-              <h4>File: {`${file.name} ${file.size} bytes`}</h4>
+              <h4>{`${file.name} - ${formatBytes(file.size)}`}</h4>
             )}
             
+            {error.file && (
+              <Typography variant='body1' className={classes.otherError}>
+                {error.file}
+              </Typography>
+            )}
           </div>
-
-          {error.file && (
-            <Typography variant='body1' className={classes.otherError}>
-              {error.file}
-            </Typography>
-          )}
         </React.Fragment>
       </Create>
     );
@@ -226,4 +222,4 @@ class UploadedFileCreate extends React.PureComponent {
 export default compose(
   withStyles(styles, { withTheme: true }),
   withSnackbar,
-)(UploadedFileCreate);
+)(UploadedVideoCreate);
