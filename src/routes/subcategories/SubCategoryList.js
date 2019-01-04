@@ -21,14 +21,14 @@ class SubCategoryList extends React.PureComponent {
   }
 
   handleAdd = () => {
-    this.props.history.push('/sub-categories/create');
+    this.props.history.push('/subcategories/create');
   }
 
   renderCell = (props) => {
     const { column, row } = props;
 
     if (column.name === '__edit__') {
-      return <RedirectCell {...props} to={`/sub-categories/${row.id}`}/>;
+      return <RedirectCell {...props} to={`/subcategories/${row.id}`}/>;
     }
     return <Table.Cell {...props} />;
   };

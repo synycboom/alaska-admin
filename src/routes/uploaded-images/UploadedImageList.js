@@ -12,7 +12,7 @@ class UploadedImageList extends React.PureComponent {
     super(props);
     this.uploadedImageService = new UploadedImageService();
     this.columns = [
-      { name: 'file', title: 'File' },
+      { name: 'original_image', title: 'File' },
       { name: 'name', title: 'Name' },
       { name: 'owner_full_name', title: 'Owner' },
       { name: 'hash_tags', title: 'Tags' },
@@ -30,7 +30,7 @@ class UploadedImageList extends React.PureComponent {
   renderCell = (props) => {
     const { column, row } = props;
 
-    if (column.name === 'file') {
+    if (column.name === 'original_image') {
       return <ThumbnailCell {...props} />;
     }
     if (column.name === '__edit__') {

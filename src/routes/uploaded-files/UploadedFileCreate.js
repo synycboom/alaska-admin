@@ -14,7 +14,8 @@ import UploadedFileService from '../../apis/UploadedFileService';
 import TagService from '../../apis/TagService';
 
 import Create from '../../components/Create';
-import MultipleSelectInput from '../../components/MultipleSelectInput';
+import SelectInput from '../../components/SelectInput';
+import { formatBytes } from '../../utils/file';
 
 
 const styles = theme => ({
@@ -184,12 +185,14 @@ class UploadedFileCreate extends React.PureComponent {
             )}
           </FormControl>
 
-          <MultipleSelectInput
-            label='Tags'
+          <SelectInput
             name='tags'
             value={tags}
             options={allTags}
             onChange={this.handleChange}
+            textFieldProps={{label: 'Tags'}}
+            isMulti
+            isCreatable
           />
 
           <div>
@@ -207,7 +210,7 @@ class UploadedFileCreate extends React.PureComponent {
             </Dropzone>
 
             {file && (
-              <h4>File: {`${file.name} ${file.size} bytes`}</h4>
+              <h4>{`${file.name} - ${formatBytes(file.size)}`}</h4>
             )}
             
           </div>

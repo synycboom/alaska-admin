@@ -9,6 +9,12 @@ class LevelService extends BaseService {
       .catch(this.handleError);
   };
 
+  listAllLevels = () => {
+    return this.client.get('/admin-api/v1.0/levels/all/')
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+
   getLevel = (id) => {
     return this.client.get(`/admin-api/v1.0/levels/${id}/`)
       .then(res => res.data)

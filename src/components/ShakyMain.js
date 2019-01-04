@@ -11,11 +11,12 @@ import MainCurrency from '../routes/currencies/MainCurrency';
 import MainLanguage from '../routes/languages/MainLanguage';
 import MainLevel from '../routes/levels/MainLevel';
 import MainCategory from '../routes/categories/MainCategory';
-import MainSubCategory from '../routes/sub-categories/MainSubCategory';
+import MainSubCategory from '../routes/subcategories/MainSubCategory';
 import MainTag from '../routes/tags/MainTag';
 import MainUploadedFile from '../routes/uploaded-files/MainUploadedFile';
 import MainUploadedImage from '../routes/uploaded-images/MainUploadedImage';
 import MainUploadedVideo from '../routes/uploaded-videos/MainUploadedVideo';
+import MainCourse from '../routes/courses/MainCourse';
 
 import Login from '../components/Login';
 import PrivateRoute from '../components/PrivateRoute';
@@ -69,11 +70,12 @@ class ShakyMain extends React.PureComponent {
         <PrivateRoute path='/languages' component={MainLanguage} />
         <PrivateRoute path='/levels' component={MainLevel} />
         <PrivateRoute path='/categories' component={MainCategory} />
-        <PrivateRoute path='/sub-categories' component={MainSubCategory} />
+        <PrivateRoute path='/subcategories' component={MainSubCategory} />
         <PrivateRoute path='/tags' component={MainTag} />
         <PrivateRoute path='/uploaded-files' component={MainUploadedFile} />
         <PrivateRoute path='/uploaded-images' component={MainUploadedImage} />
         <PrivateRoute path='/uploaded-videos' component={MainUploadedVideo} />
+        <PrivateRoute path='/courses' component={MainCourse} />
         <Route path='/login' component={Login} />
       </main>
     )

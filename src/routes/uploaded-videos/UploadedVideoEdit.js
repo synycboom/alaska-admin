@@ -1,6 +1,7 @@
 import React from 'react';
 import { withSnackbar } from 'notistack';
 import compose from 'recompose/compose';
+import Dropzone from 'react-dropzone';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -15,8 +16,9 @@ import UploadedVideoService from '../../apis/UploadedVideoService';
 import TagService from '../../apis/TagService';
 
 import Edit from '../../components/Edit';
-import MultipleSelectInput from '../../components/MultipleSelectInput';
+import SelectInput from '../../components/SelectInput';
 import ReactHLS from '../../components/ReactHLS';
+import { formatBytes } from '../../utils/file';
 
 
 const styles = theme => ({
@@ -28,10 +30,18 @@ const styles = theme => ({
   otherError: {
     color: theme.palette.error.main,
   },
+  dropzone: {
+    borderWidth: 2,
+    borderColor: '#666',
+    borderStyle: 'dashed',
+    borderRadius: 5,
+    cursor: 'pointer',
+    padding: 10,
+    marginTop: 20,
+  },
   image: {
-    margin: theme.spacing.unit,
-    width: 240,
-    height: 135,
+    marginTop: '10px',
+    width: '100%',
   },
   form: {
     width: '100%', // Fix IE 11 issue.
@@ -49,18 +59,51 @@ class UploadedVideoEdit extends React.PureComponent {
   initialError = {
     name: '',
     file: '',
+    cover: '',
     tags: '',
     non_field_errors: '',
     detail: '',
   }
   state = {
     name: '',
+    cover: null,
+    coverPreview: '',
     tags: [],
     allTags: [],
     encodedVideos: [],
     loading: false,
     error: {...this.initialError},
   };
+
+  onCoverDrop = ([file]) => {
+    if (file) {
+      this.setState(state => {
+        this.revokeObjectUrl(state.cover);
+        
+        return {
+          cover: Object.assign(file, {
+            preview: URL.createObjectURL(file)
+          })
+        };
+      });
+    } else {
+      this.setState(state => {
+        this.revokeObjectUrl(state.cover);
+        return { cover: null };
+      });
+    }
+  }
+
+  revokeObjectUrl(file) {
+    if (file) {
+      URL.revokeObjectURL(file.preview);
+    }
+  }
+
+  componentWillUnmount() {
+    // Make sure to revoke the data uris to avoid memory leaks
+    this.revokeObjectUrl(this.state.cover);
+  }
 
   componentDidMount() {
     this.loadData();
@@ -89,6 +132,7 @@ class UploadedVideoEdit extends React.PureComponent {
     const promise2 = this.uploadedVideoService.getUploadedVideo(params.id)
       .then(data => this.setState({
         name: data.name,
+        coverPreview: data.cover_preview,
         encodedVideos: data.encoded_videos,
         tags: data.tags,
       }))
@@ -108,11 +152,15 @@ class UploadedVideoEdit extends React.PureComponent {
 
   handleSave = () => {
     const { enqueueSnackbar, match: { params } } = this.props;
-    const { name, tags } = this.state;
+    const { name, cover, tags } = this.state;
     const formData = new FormData();
 
     formData.append('name', name);
     formData.append('tags', tags.map(item => item.value));
+    
+    if (cover) {
+      formData.append('cover', cover);
+    }
 
     this.setState({error: {...this.initialError}, loading: true});
     this.uploadedVideoService.updateUploadedVideo(params.id, formData)
@@ -173,6 +221,8 @@ class UploadedVideoEdit extends React.PureComponent {
     const {
       error,
       name,
+      cover,
+      coverPreview,
       tags,
       allTags,
       encodedVideos,
@@ -216,13 +266,52 @@ class UploadedVideoEdit extends React.PureComponent {
             )}
           </FormControl>
 
-          <MultipleSelectInput
-            label='Tags'
+          <SelectInput
+            isMulti
+            isCreatable
+            textFieldProps={{label: 'Tags'}}
             name='tags'
             value={tags}
             options={allTags}
             onChange={this.handleChange}
           />
+
+          <div>
+            <Dropzone
+              accept='image/*'
+              maxFiles={1}
+              onDrop={this.onCoverDrop}
+            >
+              {({getRootProps, getInputProps}) => (
+                <div {...getRootProps()} className={classes.dropzone}>
+                  <input {...getInputProps()} />
+
+                  {cover || coverPreview ? (
+                    <img
+                      alt='Video Cover'
+                      className={classes.image}
+                      src={cover ? cover.preview : coverPreview}
+                    />
+                  ) : (
+                    <div>
+                      <p>Drop an <b>image</b> file here, or click to select an <b>image</b> file</p>
+                    </div>
+                  )}
+                  
+                  {cover && (
+                    <h4>{`${cover.name} - ${formatBytes(cover.size)}`}</h4>
+                  )}
+
+                </div>
+              )}
+            </Dropzone>
+
+            {error.cover && (
+              <Typography variant='body1' className={classes.otherError}>
+                {error.cover}
+              </Typography>
+            )}
+          </div>
 
           <br />
 
@@ -248,12 +337,6 @@ class UploadedVideoEdit extends React.PureComponent {
               <Divider style={{marginTop: 20}}/>
             </div>
           ))}
-
-          {error.image && (
-            <Typography variant='body1' className={classes.otherError}>
-              {error.image}
-            </Typography>
-          )}
         </React.Fragment>
       </Edit>
     );

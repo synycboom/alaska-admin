@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { withSnackbar } from 'notistack';
 import compose from 'recompose/compose';
 import Dropzone from 'react-dropzone';
@@ -14,7 +15,8 @@ import UploadedImageService from '../../apis/UploadedImageService';
 import TagService from '../../apis/TagService';
 
 import Create from '../../components/Create';
-import MultipleSelectInput from '../../components/MultipleSelectInput';
+import SelectInput from '../../components/SelectInput';
+import { formatBytes } from '../../utils/file';
 
 
 const styles = theme => ({
@@ -27,13 +29,17 @@ const styles = theme => ({
     color: theme.palette.error.main,
   },
   dropzone: {
-    width: 'fit-content',
+    borderWidth: 2,
+    borderColor: '#666',
+    borderStyle: 'dashed',
+    borderRadius: 5,
     cursor: 'pointer',
+    padding: 10,
+    marginTop: 20,
   },
   image: {
-    margin: theme.spacing.unit,
-    width: 240,
-    height: 135,
+    marginTop: '10px',
+    width: '100%',
   },
   form: {
     width: '100%', // Fix IE 11 issue.
@@ -130,7 +136,7 @@ class UploadedImageCreate extends React.PureComponent {
   }
 
   handleSave = () => {
-    const { enqueueSnackbar } = this.props;
+    const { enqueueSnackbar, onSaveSuccess } = this.props;
     const { name, file, tags } = this.state;
     const formData = new FormData();
     
@@ -145,6 +151,7 @@ class UploadedImageCreate extends React.PureComponent {
     this.uploadedImageService.createUploadedImage(formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
+        onSaveSuccess(data.id)
         this.handleBack();
       })
       .catch(this.catchError)
@@ -152,11 +159,17 @@ class UploadedImageCreate extends React.PureComponent {
   }
 
   handleBack = () => {
-    this.props.history.goBack();
+    if (!this.props.withoutHeader) {
+      this.props.history.goBack();
+    }
   }
   
   render() {
-    const { classes } = this.props;
+    const { 
+      classes, 
+      withoutHeader, 
+    } = this.props;
+
     const {
       error,
       name,
@@ -171,6 +184,7 @@ class UploadedImageCreate extends React.PureComponent {
         onSave={this.handleSave} 
         onBack={this.handleBack} 
         loading={loading}
+        withoutHeader={withoutHeader}
         text='Upload Image'
       >
         <React.Fragment>
@@ -201,8 +215,10 @@ class UploadedImageCreate extends React.PureComponent {
             )}
           </FormControl>
 
-          <MultipleSelectInput
-            label='Tags'
+          <SelectInput
+            isMulti
+            isCreatable
+            textFieldProps={{label: 'Tags'}}
             name='tags'
             value={tags}
             options={allTags}
@@ -214,35 +230,52 @@ class UploadedImageCreate extends React.PureComponent {
               accept='image/*'
               maxFiles={1}
               onDrop={this.onDrop}
-              onFileDialogCancel={this.onCancelFile}
             >
               {({getRootProps, getInputProps}) => (
                 <div {...getRootProps()} className={classes.dropzone}>
                   <input {...getInputProps()} />
-                  <img
-                    className={classes.image}
-                    src={file ? file.preview : ''}
-                  />
+
+                  {file ? (
+                    <img
+                      alt='File'
+                      className={classes.image}
+                      src={file.preview}
+                    />
+                  ) : (
+                    <div>
+                      <p>Drop an <b>image</b> file here, or click to select an <b>image</b> file</p>
+                    </div>
+                  )}
+                  
+                  {file && (
+                    <h4>{`${file.name} - ${formatBytes(file.size)}`}</h4>
+                  )}
+
                 </div>
               )}
             </Dropzone>
 
-            {file && (
-              <h4>File: {`${file.name} ${file.size} bytes`}</h4>
+            {error.file && (
+              <Typography variant='body1' className={classes.otherError}>
+                {error.file}
+              </Typography>
             )}
-
           </div>
-
-          {error.file && (
-            <Typography variant='body1' className={classes.otherError}>
-              {error.file}
-            </Typography>
-          )}
         </React.Fragment>
       </Create>
     );
   }
 }
+
+UploadedImageCreate.propTypes = {
+  classes: PropTypes.object.isRequired,
+  withoutHeader: PropTypes.bool,
+  onSaveSuccess: PropTypes.func,
+}
+
+UploadedImageCreate.defaultProps = {
+  onSaveSuccess() {},
+};
 
 export default compose(
   withStyles(styles, { withTheme: true }),

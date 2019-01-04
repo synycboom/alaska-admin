@@ -11,6 +11,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import SubCategoryService from '../../apis/SubCategoryService';
+import CategoryService from '../../apis/CategoryService';
 import Edit from '../../components/Edit';
 
 
@@ -35,6 +36,7 @@ const styles = theme => ({
 
 class SubCategoryEdit extends React.PureComponent {
   subCategoryService = new SubCategoryService();
+  categoryService = new CategoryService();
   initialError = {
     parent: '',
     name: '',
@@ -58,7 +60,7 @@ class SubCategoryEdit extends React.PureComponent {
 
     this.setState({ loading: true });
 
-    const promise1 = this.subCategoryService.listParentCategories()
+    const promise1 = this.categoryService.listAllCategories()
       .then(data => {
         this.setState({parentCategories: data.results});
       })
@@ -177,7 +179,7 @@ class SubCategoryEdit extends React.PureComponent {
         onDelete={this.handleDelete} 
         loading={loading}
         text='Edit Sub-Category'
-        confirmDeleteDetail="Courses' sub-categories will be set to null."
+        confirmDeleteDetail="Courses' subcategories will be set to null."
       >
         <React.Fragment>
           {error.non_field_errors && (

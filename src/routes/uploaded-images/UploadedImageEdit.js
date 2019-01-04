@@ -13,7 +13,7 @@ import UploadedImageService from '../../apis/UploadedImageService';
 import TagService from '../../apis/TagService';
 
 import Edit from '../../components/Edit';
-import MultipleSelectInput from '../../components/MultipleSelectInput';
+import SelectInput from '../../components/SelectInput';
 
 
 const styles = theme => ({
@@ -249,8 +249,10 @@ class UploadedImageEdit extends React.PureComponent {
             )}
           </FormControl>
 
-          <MultipleSelectInput
-            label='Tags'
+          <SelectInput
+            isMulti
+            isCreatable
+            textFieldProps={{label: 'Tags'}}
             name='tags'
             value={tags}
             options={allTags}

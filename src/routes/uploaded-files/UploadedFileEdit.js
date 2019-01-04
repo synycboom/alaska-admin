@@ -13,7 +13,7 @@ import UploadedFileService from '../../apis/UploadedFileService';
 import TagService from '../../apis/TagService';
 
 import Edit from '../../components/Edit';
-import MultipleSelectInput from '../../components/MultipleSelectInput';
+import SelectInput from '../../components/SelectInput';
 
 
 const styles = theme => ({
@@ -230,9 +230,11 @@ class UploadedFileEdit extends React.PureComponent {
             )}
           </FormControl>
 
-          <MultipleSelectInput
-            label='Tags'
+          <SelectInput
+            isMulti
+            isCreatable
             name='tags'
+            textFieldProps={{label: 'Tags'}}
             value={tags}
             options={allTags}
             onChange={this.handleChange}

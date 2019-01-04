@@ -32,14 +32,17 @@ class Create extends React.PureComponent {
       text,
       children,
       loading,
+      withoutHeader,
     } = this.props;
 
     return (
       <Paper className={classes.paper}>
-        <CreateHeader 
-          text={text}
-          onBack={onBack}
-        />
+        {!withoutHeader && (
+          <CreateHeader 
+            text={text}
+            onBack={onBack}
+          />
+        )}
 
         <form className={classes.form}>
           {children}
@@ -67,6 +70,7 @@ Create.propTypes = {
   text: PropTypes.string,
   children: PropTypes.element,
   loading: PropTypes.bool,
+  withoutHeader: PropTypes.bool,
 }
 
 export default withStyles(styles, { withTheme: true })(Create);

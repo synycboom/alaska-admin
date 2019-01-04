@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { withSnackbar } from 'notistack';
 import compose from 'recompose/compose';
 import Dropzone from 'react-dropzone';
@@ -14,7 +15,7 @@ import UploadedVideoService from '../../apis/UploadedVideoService';
 import TagService from '../../apis/TagService';
 
 import Create from '../../components/Create';
-import MultipleSelectInput from '../../components/MultipleSelectInput';
+import SelectInput from '../../components/SelectInput';
 import { formatBytes } from '../../utils/file';
 
 const styles = theme => ({
@@ -35,6 +36,10 @@ const styles = theme => ({
     padding: 10,
     marginTop: 20,
   },
+  image: {
+    marginTop: '10px',
+    width: '100%',
+  },
   form: {
     width: '100%', // Fix IE 11 issue.
     marginTop: theme.spacing.unit,
@@ -51,6 +56,7 @@ class UploadedVideoCreate extends React.PureComponent {
   initialError = {
     name: '',
     file: '',
+    cover: '',
     tags: '',
     non_field_errors: '',
     detail: '',
@@ -58,6 +64,7 @@ class UploadedVideoCreate extends React.PureComponent {
   state = {
     name: '',
     file: null,
+    cover: null,
     tags: [],
     allTags: [],
     loading: false,
@@ -72,9 +79,39 @@ class UploadedVideoCreate extends React.PureComponent {
     }
   }
 
+  onCoverDrop = ([file]) => {
+    if (file) {
+      this.setState(state => {
+        this.revokeObjectUrl(state.cover);
+        
+        return {
+          cover: Object.assign(file, {
+            preview: URL.createObjectURL(file)
+          })
+        };
+      });
+    } else {
+      this.setState(state => {
+        this.revokeObjectUrl(state.cover);
+        return { cover: null };
+      });
+    }
+  }
+
   onCancelFile = () => {
     this.setState({ file: null });
   };
+
+  revokeObjectUrl(file) {
+    if (file) {
+      URL.revokeObjectURL(file.preview);
+    }
+  }
+
+  componentWillUnmount() {
+    // Make sure to revoke the data uris to avoid memory leaks
+    this.revokeObjectUrl(this.state.cover);
+  }
 
   componentDidMount() {
     this.loadData();
@@ -109,8 +146,8 @@ class UploadedVideoCreate extends React.PureComponent {
   }
 
   handleSave = () => {
-    const { enqueueSnackbar } = this.props;
-    const { name, file, tags } = this.state;
+    const { enqueueSnackbar, onSaveSuccess } = this.props;
+    const { name, file, tags, cover } = this.state;
     const formData = new FormData();
     
     formData.append('name', name);
@@ -120,10 +157,15 @@ class UploadedVideoCreate extends React.PureComponent {
       formData.append('file', file);
     }
 
+    if (cover) {
+      formData.append('cover', cover);
+    }
+
     this.setState({error: {...this.initialError}, loading: true});
     this.uploadedVideoService.createUploadedVideo(formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
+        onSaveSuccess(data.id)
         this.handleBack();
       })
       .catch(this.catchError)
@@ -131,15 +173,22 @@ class UploadedVideoCreate extends React.PureComponent {
   }
 
   handleBack = () => {
-    this.props.history.goBack();
+    if (!this.props.withoutHeader) {
+      this.props.history.goBack();
+    }
   }
   
   render() {
-    const { classes } = this.props;
+    const { 
+      classes,
+      withoutHeader,
+    } = this.props;
+
     const {
       error,
       name,
       file,
+      cover,
       tags,
       allTags,
       loading,
@@ -150,6 +199,7 @@ class UploadedVideoCreate extends React.PureComponent {
         onSave={this.handleSave} 
         onBack={this.handleBack} 
         loading={loading}
+        withoutHeader={withoutHeader}
         text='Upload Video'
       >
         <React.Fragment>
@@ -180,14 +230,53 @@ class UploadedVideoCreate extends React.PureComponent {
             )}
           </FormControl>
 
-          <MultipleSelectInput
-            label='Tags'
+          <SelectInput
+            isMulti
+            isCreatable
+            textFieldProps={{label: 'Tags'}}
             name='tags'
             value={tags}
             options={allTags}
             onChange={this.handleChange}
           />
 
+          <div>
+            <Dropzone
+              accept='image/*'
+              maxFiles={1}
+              onDrop={this.onCoverDrop}
+            >
+              {({getRootProps, getInputProps}) => (
+                <div {...getRootProps()} className={classes.dropzone}>
+                  <input {...getInputProps()} />
+
+                  {cover ? (
+                    <img
+                      alt='Video Cover'
+                      className={classes.image}
+                      src={cover.preview}
+                    />
+                  ) : (
+                    <div>
+                      <p>Drop an <b>image</b> file here, or click to select an <b>image</b> file</p>
+                    </div>
+                  )}
+                  
+                  {cover && (
+                    <h4>{`${cover.name} - ${formatBytes(cover.size)}`}</h4>
+                  )}
+
+                </div>
+              )}
+            </Dropzone>
+
+            {error.cover && (
+              <Typography variant='body1' className={classes.otherError}>
+                {error.cover}
+              </Typography>
+            )}
+          </div>
+          
           <div>
             <Dropzone
               accept='video/*'
@@ -198,14 +287,17 @@ class UploadedVideoCreate extends React.PureComponent {
               {({getRootProps, getInputProps}) => (
                 <div {...getRootProps()} className={classes.dropzone}>
                   <input {...getInputProps()} />
-                  <p>Drop a file here, or click to select a file</p>
+
+                  {file ? (
+                    <h4>{`${file.name} - ${formatBytes(file.size)}`}</h4>
+                  ) : (
+                    <div>
+                      <p>Drop a <b>video</b> file here, or click to select a <b>video</b> file</p>
+                    </div>
+                  )}
                 </div>
               )}
             </Dropzone>
-
-            {file && (
-              <h4>{`${file.name} - ${formatBytes(file.size)}`}</h4>
-            )}
             
             {error.file && (
               <Typography variant='body1' className={classes.otherError}>
@@ -218,6 +310,16 @@ class UploadedVideoCreate extends React.PureComponent {
     );
   }
 }
+
+UploadedVideoCreate.propTypes = {
+  classes: PropTypes.object.isRequired,
+  withoutHeader: PropTypes.bool,
+  onSaveSuccess: PropTypes.func,
+};
+
+UploadedVideoCreate.defaultProps = {
+  onSaveSuccess() {},
+};
 
 export default compose(
   withStyles(styles, { withTheme: true }),

@@ -9,6 +9,12 @@ class SubscriptionPlanService extends BaseService {
       .catch(this.handleError);
   };
 
+  listAllSubscriptionPlans = () => {
+    return this.client.get('/admin-api/v1.0/subscription-plans/all/')
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+
   getSubscriptionPlan = (id) => {
     return this.client.get(`/admin-api/v1.0/subscription-plans/${id}/`)
       .then(res => res.data)

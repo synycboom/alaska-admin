@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import Select from 'react-select';
 import CreatableSelect from 'react-select/lib/Creatable';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -13,13 +14,9 @@ import { emphasize } from '@material-ui/core/styles/colorManipulator';
 
 
 const styles = theme => ({
-  root: {
-    flexGrow: 1,
-    height: 250,
-  },
   input: {
     display: 'flex',
-    padding: 0,
+    padding: '20px 12px 10px',
   },
   valueContainer: {
     display: 'flex',
@@ -47,10 +44,11 @@ const styles = theme => ({
     position: 'absolute',
     left: 2,
     fontSize: 16,
+    zIndex: 1,
   },
   paper: {
     position: 'absolute',
-    zIndex: 1,
+    zIndex: 2,
     marginTop: theme.spacing.unit,
     left: 0,
     right: 0,
@@ -63,7 +61,7 @@ const styles = theme => ({
 function NoOptionsMessage(props) {
   return (
     <Typography
-      color="textSecondary"
+      color='textSecondary'
       className={props.selectProps.classes.noOptionsMessage}
       {...props.innerProps}
     >
@@ -99,7 +97,7 @@ function Option(props) {
     <MenuItem
       buttonRef={props.innerRef}
       selected={props.isFocused}
-      component="div"
+      component='div'
       style={{
         fontWeight: props.isSelected ? 500 : 400,
       }}
@@ -113,7 +111,7 @@ function Option(props) {
 function Placeholder(props) {
   return (
     <Typography
-      color="textSecondary"
+      color='textSecondary'
       className={props.selectProps.classes.placeholder}
       {...props.innerProps}
     >
@@ -150,7 +148,11 @@ function MultiValue(props) {
 
 function Menu(props) {
   return (
-    <Paper square className={props.selectProps.classes.paper} {...props.innerProps}>
+    <Paper
+      square 
+      className={props.selectProps.classes.paper} 
+      {...props.innerProps}
+    >
       {props.children}
     </Paper>
   );
@@ -167,13 +169,8 @@ const components = {
   ValueContainer,
 };
 
-class MultipleSelectInput extends React.Component {
-  state = {
-    single: null,
-    multi: null,
-  };
-
-  handleChange = (value, actionMeta) => {
+class SelectInput extends React.Component {
+  handleChange = (value) => {
     const event = {
       target: {
         name: this.props.name,
@@ -196,12 +193,14 @@ class MultipleSelectInput extends React.Component {
 
   render() {
     const { 
-      classes, 
-      theme, 
-      label, 
-      options, 
-      value, 
-      placeholder, 
+      classes,
+      theme,
+      options,
+      value,
+      isMulti,
+      isCreatable,
+      textFieldProps,
+      placeholder,
     } = this.props;
 
     const selectStyles = {
@@ -214,41 +213,70 @@ class MultipleSelectInput extends React.Component {
       }),
     };
 
-    return (
-      <CreatableSelect
-        classes={classes}
-        styles={selectStyles}
-        textFieldProps={{
-          label: label,
-          InputLabelProps: {
-            shrink: true,
-          },
-        }}
-        options={options}
-        components={components}
-        value={value}
-        onChange={this.handleChange}
-        placeholder={placeholder}
-        getNewOptionData={this.getNewOptionData}
-        isMulti
-      />
-    );
+    if (isMulti && isCreatable) {
+      return (
+        <CreatableSelect
+          classes={classes}
+          styles={selectStyles}
+          textFieldProps={textFieldProps}
+          options={options}
+          components={components}
+          value={value}
+          onChange={this.handleChange}
+          placeholder={placeholder}
+          getNewOptionData={this.getNewOptionData}
+          isMulti
+        />
+      );
+    } else if (isMulti) {
+      return (
+        <Select
+          classes={classes}
+          styles={selectStyles}
+          textFieldProps={textFieldProps}
+          options={options}
+          components={components}
+          value={value}
+          onChange={this.handleChange}
+          placeholder={placeholder}
+          isClearable
+          isMulti
+        />
+      );
+    } else {
+      return (
+        <Select
+          classes={classes}
+          styles={selectStyles}
+          textFieldProps={textFieldProps}
+          options={options}
+          components={components}
+          value={value}
+          onChange={this.handleChange}
+          placeholder={placeholder}
+          isClearable
+        />
+      );
+    }
   }
 }
 
-MultipleSelectInput.propTypes = {
+SelectInput.propTypes = {
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
   value: PropTypes.any,
+  isMulti: PropTypes.bool,
+  isCreatable: PropTypes.bool,
+  textFieldProps: PropTypes.object,
   options: PropTypes.array.isRequired,
   onChange: PropTypes.func.isRequired,
 };
 
-MultipleSelectInput.defaultProps = {
+SelectInput.defaultProps = {
   placeholder: '',
   value: [],
   options: [],
   onChange: () => {},
 };
 
-export default withStyles(styles, { withTheme: true })(MultipleSelectInput);
+export default withStyles(styles, { withTheme: true })(SelectInput);

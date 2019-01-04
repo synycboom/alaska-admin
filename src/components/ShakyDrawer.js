@@ -25,6 +25,7 @@ import BookmarkIcon from '@material-ui/icons/Bookmark';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ImageIcon from '@material-ui/icons/Image';
 import VideocamIcon from '@material-ui/icons/Videocam';
+import QueuePlayNextIcon from '@material-ui/icons/QueuePlayNext';
 
 import ListItemLink from './ListItemLink';
 
@@ -90,6 +91,7 @@ class ShakyDrawer extends React.PureComponent {
           <ListItemLink to='/instructors' primary='Instructors' icon={<AccessibilityIcon />} />
           <ListItemLink to='/subscription-plans' primary='Subscription Plans' icon={<FormatListBulletedIcon />} />
           <Divider />
+          <ListItemLink to='/courses' primary='Courses' icon={<QueuePlayNextIcon />} />
           <ListItemLink to='/tags' primary='Tags' icon={<BookmarkIcon />} />
           <ListItemLink to='/uploaded-files' primary='Files' icon={<FileCopyIcon />} />
           <ListItemLink to='/uploaded-images' primary='Images' icon={<ImageIcon />} />
@@ -99,7 +101,7 @@ class ShakyDrawer extends React.PureComponent {
           <ListItemLink to='/languages' primary='Languages' icon={<LanguageIcon />} />
           <ListItemLink to='/levels' primary='Levels' icon={<TrendingUpIcon />} />
           <ListItemLink to='/categories' primary='Categories' icon={<CategoryIcon />} />
-          <ListItemLink to='/sub-categories' primary='Sub-categories' icon={<ViewModuleIcon />} />
+          <ListItemLink to='/subcategories' primary='Subcategories' icon={<ViewModuleIcon />} />
           <Divider />
           <ListItem button onClick={this.handleLogOut}>
             <ListItemIcon>

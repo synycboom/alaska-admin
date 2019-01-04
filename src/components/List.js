@@ -96,6 +96,7 @@ class List extends React.PureComponent {
       onAdd,
       renderCell,
       columns,
+      gridChildren,
       tableColumnExtensions,
     } = this.props;
 
@@ -111,6 +112,7 @@ class List extends React.PureComponent {
           rows={rows}
           columns={columns}
         >
+          {gridChildren}
           <PagingState
             currentPage={currentPage}
             onCurrentPageChange={this.changeCurrentPage}
@@ -141,6 +143,7 @@ List.propTypes = {
   fetchDataList: PropTypes.func,
   columns: PropTypes.array,
   tableColumnExtensions: PropTypes.array,
+  gridChildren: PropTypes.element,
 }
 
 export default compose(

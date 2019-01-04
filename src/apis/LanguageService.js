@@ -9,6 +9,12 @@ class LanguageService extends BaseService {
       .catch(this.handleError);
   };
 
+  listAllLanguages = () => {
+    return this.client.get('/admin-api/v1.0/languages/all/')
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+
   getLangauge = (id) => {
     return this.client.get(`/admin-api/v1.0/languages/${id}/`)
       .then(res => res.data)

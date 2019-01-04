@@ -9,6 +9,12 @@ class UserService extends BaseService {
       .catch(this.handleError);
   };
 
+  listAllInstructors = () => {
+    return this.client.get('/admin-api/v1.0/users/instructor/all/')
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+
   getInstructor = (id) => {
     return this.client.get(`/admin-api/v1.0/users/${id}/instructor/`)
       .then(res => res.data)

@@ -9,6 +9,18 @@ class CategoryService extends BaseService {
       .catch(this.handleError);
   };
 
+  listAllCategories = () => {
+    return this.client.get('/admin-api/v1.0/categories/all/')
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+
+  listSubCategories = (id) => {
+    return this.client.get(`/admin-api/v1.0/categories/${id}/subcategories/`)
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+
   getCategory = (id) => {
     return this.client.get(`/admin-api/v1.0/categories/${id}/`)
       .then(res => res.data)

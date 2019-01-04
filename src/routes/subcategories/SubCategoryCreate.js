@@ -11,6 +11,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import SubCategoryService from '../../apis/SubCategoryService';
+import CategoryService from '../../apis/CategoryService';
 import Create from '../../components/Create';
 
 
@@ -35,6 +36,7 @@ const styles = theme => ({
 
 class SubCategoryCreate extends React.PureComponent {
   subCategoryService = new SubCategoryService();
+  categoryService = new CategoryService();
   initialError = {
     parent: '',
     name: '',
@@ -51,7 +53,7 @@ class SubCategoryCreate extends React.PureComponent {
 
   componentDidMount() {
     this.setState({loading: true});
-    this.subCategoryService.listParentCategories()
+    this.categoryService.listAllCategories()
       .then(data => {
         this.setState({parentCategories: data.results});
       })
