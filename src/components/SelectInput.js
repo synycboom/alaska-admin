@@ -171,6 +171,12 @@ const components = {
 
 class SelectInput extends React.Component {
   handleChange = (value) => {
+    if (value instanceof Array) {
+      value = value.map(item => item.value);
+    } else {
+      value = value.value;
+    }
+    
     const event = {
       target: {
         name: this.props.name,
@@ -213,6 +219,22 @@ class SelectInput extends React.Component {
       }),
     };
 
+    // Automatically find a value from the options 
+    let derivedValue;
+
+    if (value instanceof Array) {
+      derivedValue = value.map(val => options.find(
+        option => option.value === val
+      ));
+    } else if (value) {
+      derivedValue = options.find(
+        option => option.value === value
+      );
+    } else {
+      // value doesn't have a truth value maybe it's null or undefined
+      // don't do anything here
+    }
+
     if (isMulti && isCreatable) {
       return (
         <CreatableSelect
@@ -221,7 +243,7 @@ class SelectInput extends React.Component {
           textFieldProps={textFieldProps}
           options={options}
           components={components}
-          value={value}
+          value={derivedValue}
           onChange={this.handleChange}
           placeholder={placeholder}
           getNewOptionData={this.getNewOptionData}
@@ -236,7 +258,7 @@ class SelectInput extends React.Component {
           textFieldProps={textFieldProps}
           options={options}
           components={components}
-          value={value}
+          value={derivedValue}
           onChange={this.handleChange}
           placeholder={placeholder}
           isClearable
@@ -251,7 +273,7 @@ class SelectInput extends React.Component {
           textFieldProps={textFieldProps}
           options={options}
           components={components}
-          value={value}
+          value={derivedValue}
           onChange={this.handleChange}
           placeholder={placeholder}
           isClearable
@@ -274,7 +296,6 @@ SelectInput.propTypes = {
 
 SelectInput.defaultProps = {
   placeholder: '',
-  value: [],
   options: [],
   onChange: () => {},
 };

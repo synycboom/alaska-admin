@@ -7,7 +7,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import CourseService from '../../apis/CourseService';
 import Paper from '@material-ui/core/Paper';
-import CreateHeader from '../../components/CreateHeader';
+import EditHeader from '../../components/EditHeader';
 import CourseLanding from './CourseLanding';
 import CourseCurriculum from './CourseCurriculum';
 
@@ -59,7 +59,7 @@ class CourseEdit extends React.PureComponent {
     })
   };
 
-  handleSave = () => {
+  handleSave = _ => {
     const { enqueueSnackbar } = this.props;
     const { name } = this.state;
     const data = { name };
@@ -71,14 +71,14 @@ class CourseEdit extends React.PureComponent {
         this.handleBack();
       })
       .catch(this.catchError)
-      .then(() => this.setState({ loading: false }));
+      .then(_ => this.setState({ loading: false }));
   };
 
-  handleBack = () => {
+  handleBack = _ => {
     this.props.history.goBack();
   };
   
-  handleTabChange = (event, selectedTab) => {
+  handleTabChange = (_, selectedTab) => {
     this.setState({ selectedTab });
   };
 
@@ -93,9 +93,10 @@ class CourseEdit extends React.PureComponent {
 
     return (
       <Paper className={classes.paper}>
-        <CreateHeader 
-          text='Create Course'
-          onBack={this.handleBack}
+        <EditHeader 
+          text='Edit Course' 
+          onBack={this.handleBack} 
+          onDelete={this.handleDelete} 
         />
         
         <br />
@@ -112,8 +113,10 @@ class CourseEdit extends React.PureComponent {
             <Tab label='Curriculum' className={classes.curriculumTab}/>
           </Tabs>
         </Paper>
-        {selectedTab === 0 && <CourseLanding />}
+
+        {selectedTab === 0 && <CourseLanding mode='update'/>}
         {selectedTab === 1 && <CourseCurriculum />}
+
       </Paper>
     );
   }

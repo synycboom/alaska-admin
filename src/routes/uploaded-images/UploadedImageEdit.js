@@ -261,12 +261,14 @@ class UploadedImageEdit extends React.PureComponent {
 
           <p>Original Image</p>
           <img
+            alt='original'
             className={classes.image}
             src={originalImagePath}
           />
 
           <p>Blurred Image</p>
           <img
+            alt='blurred'
             className={classes.image}
             src={blurredImagePath}
           />

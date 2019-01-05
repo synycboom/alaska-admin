@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { withSnackbar } from 'notistack';
 import compose from 'recompose/compose';
+import { withSnackbar } from 'notistack';
+import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import ImageIcon from '@material-ui/icons/Image';
@@ -25,6 +28,7 @@ import UploadedVideoService from '../../apis/UploadedVideoService';
 import SelectInput from '../../components/SelectInput';
 import LoadingButton from '../../components/LoadingButton';
 import ReactHLS from '../../components/ReactHLS';
+import TextEditor from '../../components/TextEditor';
 import ModSelectImage from '../uploaded-images/ModSelectImage';
 import ModUploadImage from '../uploaded-images/ModUploadImage';
 import ModSelectVideo from '../uploaded-videos/ModSelectVideo';
@@ -104,94 +108,44 @@ class CourseLanding extends React.PureComponent {
     openModUploadVideo: false,
   }
 
-  componentDidMount() {
-    this.loadData();
-  }
+  handleSave = _ => {
+    const { match: { params }, mode } = this.props;
+    const data = this.populateSaveData();
+    let promise = Promise.resolve();
 
-  catchError = error => {
-    let newError = {};
-    
-    for (let key in error) {
-      if (error.hasOwnProperty(key)) {
-        newError[key] = error[key];  
-      }
+    this.fetchStart();
+
+    if (mode === 'create') {
+      promise = this.courseService.createCourseLanding(data);
+    } else {
+      promise = this.courseService.updateCourseLanding(params.id, data);
     }
-
-    this.props.enqueueSnackbar('The action was not success.', { variant: 'error' });
-    this.setState({error: newError});
-  };
-
-  loadData = () => {
-    Promise.all([
-      this.languageService.listAllLanguages(),
-      this.levelService.listAllLevels(),
-      this.categoryService.listAllCategories(),
-      this.userService.listAllInstructors(),
-      this.subscriptionPlanService.listAllSubscriptionPlans(),
-    ]).then(dataList => {
-      this.setState({
-        languages: dataList[0].results.map(item => ({ value: item.id, label: item.name })),
-        levels: dataList[1].results.map(item => ({ value: item.id, label: item.name })),
-        categories: dataList[2].results.map(item => ({ value: item.id, label: item.name })),
-        instructors: dataList[3].results.map(item => ({ value: item.id, label: item.full_name })),
-        allSubscriptionPlans: dataList[4].results.map(item => ({ value: item.id, label: item.name })),
-      })
-    }).catch(_ => this.props.enqueueSnackbar(
-      'Something has gone wrong, please refresh.', 
-      { variant: 'error' }
-    ));
-  };
-
-  handleSave = () => {
-    const data = { 
-      title: this.state.title,
-      headline: this.state.headline,
-      description: this.state.description,
-      published: this.state.published,
-      uploaded_cover_image: this.state.uploadedCoverImageId,
-      uploaded_trailer_video: this.state.uploadedTrailerVideoId,
-      category: this.state.category && this.state.category.value,
-      subcategory: this.state.subcategory && this.state.subcategory.value,
-      language: this.state.language && this.state.language.value,
-      level: this.state.level && this.state.level.value,
-      instructor: this.state.instructor && this.state.instructor.value,
-      subscription_plans: this.state.subscriptionPlans.map(item => item.value),
-    };
-
-    this.setState({error: {...this.initialError}, loading: true});
-    this.courseService.createCourseLanding(data)
-      .then(data => {
+    
+    promise.then(data => {
         this.props.enqueueSnackbar(data.detail, { variant: 'success' });
         this.props.onSaveSuccess();
       })
       .catch(this.catchError)
-      .then(() => this.setState({ loading: false }));
+      .then(this.fetchEnd);
   };
 
-  handleEdit = () => {
-
-  };
-
-  handleChange = (event) => {
+  handleChange = (event, checked) => {
     this.setState({
-      [event.target.name]: event.target.value
+      [event.target.name]: checked || event.target.value
     });
   };
 
   handleCategoryChange = (event) => {
     this.handleChange(event)
-    this.categoryService.listSubCategories(event.target.value.value)
+    this.categoryService.listSubCategories(event.target.value)
       .then(data => this.setState({
         subcategory: null,
-        subcategories: data.results.map(item => ({ 
-          value: item.id, 
-          label: item.name 
+        subcategories: data.results.map(item => ({
+          value: item.id,
+          label: item.name
         }))
       }))
-      .catch(_ => this.props.enqueueSnackbar(
-        'Something has gone wrong, please refresh.', 
-        { variant: 'error' }
-      ));
+      .catch(this.catchGeneralError);
   }
 
   // ------------------------------------------------------------------ ModSelectImage
@@ -211,10 +165,7 @@ class CourseLanding extends React.PureComponent {
         uploadedCoverImagePreview: data.original_image,
         uploadedCoverImageName: data.name,
       }))
-      .catch(_ => this.props.enqueueSnackbar(
-        'Something has gone wrong, please refresh.', 
-        { variant: 'error' }
-      ));
+      .catch(this.catchGeneralError);
   };
 
   handleDiscardImage = () => {
@@ -230,7 +181,7 @@ class CourseLanding extends React.PureComponent {
   handleUploadImageOpen = () => {
     this.setState({ openModUploadImage: true });
   };
-  
+
   handleUploadImageClose = () => {
     this.setState({ openModUploadImage: false });
   };
@@ -243,21 +194,18 @@ class CourseLanding extends React.PureComponent {
         uploadedCoverImagePreview: data.original_image,
         uploadedCoverImageName: data.name,
       }))
-      .catch(_ => this.props.enqueueSnackbar(
-        'Something has gone wrong, please refresh.', 
-        { variant: 'error' }
-      ));
+      .catch(this.catchGeneralError);
   };
 
   // ----------------------------------------------------------------- ModSelectVideo
   handleVideoOpen = () => {
     this.setState({ openModSelectVideo: true });
   };
-  
+
   handleVideoClose = () => {
     this.setState({ openModSelectVideo: false });
   };
-  
+
   handleVideoSelect = (id) => {
     this.uploadedVideoService.getUploadedVideo(id)
       .then(data => this.setState({
@@ -265,15 +213,12 @@ class CourseLanding extends React.PureComponent {
         openModSelectVideo: false,
         uploadedTrailerVideoName: data.name,
         uploadedTrailerVideoPreview: (
-          data.encoded_videos.length > 0 
-          ? data.encoded_videos[0].url 
+          data.encoded_videos.length > 0
+          ? data.encoded_videos[0].url
           : null
         ),
       }))
-      .catch(_ => this.props.enqueueSnackbar(
-        'Something has gone wrong, please refresh.', 
-        { variant: 'error' }
-      ));
+      .catch(this.catchGeneralError);
   };
 
   handleDiscardVideo = () => {
@@ -289,7 +234,7 @@ class CourseLanding extends React.PureComponent {
   handleUploadVideoOpen = () => {
     this.setState({ openModUploadVideo: true });
   };
-  
+
   handleUploadVideoClose = () => {
     this.setState({ openModUploadVideo: false });
   };
@@ -301,22 +246,142 @@ class CourseLanding extends React.PureComponent {
         openModSelectVideo: false,
         uploadedTrailerVideoName: data.name,
         uploadedTrailerVideoPreview: (
-          data.encoded_videos.length > 0 
-          ? data.encoded_videos[0].url 
+          data.encoded_videos.length > 0
+          ? data.encoded_videos[0].url
           : null
         ),
       }))
-      .catch(_ => this.props.enqueueSnackbar(
-        'Something has gone wrong, please refresh.',
-        { variant: 'error' }
-      ));
+      .catch(this.catchGeneralError);
   };
-  
+
+  // ------------------------------------------------------------------------------------ Utils
+  catchError = error => {
+    let newError = {};
+
+    for (let key in error) {
+      if (error.hasOwnProperty(key)) {
+        newError[key] = error[key];
+      }
+    }
+
+    this.props.enqueueSnackbar('The action was not success.', { variant: 'error' });
+    this.setState({error: newError});
+  };
+
+  catchGeneralError = _ => {
+    this.props.enqueueSnackbar(
+      'Something has gone wrong, please refresh.',
+      { variant: 'error' }
+    );
+  };
+
+  fetchStart = _ => {
+    this.setState({
+      error: {
+        ...this.initialError
+      },
+      loading: true
+    });
+  };
+
+  fetchEnd = _ => {
+    this.setState({ loading: false });
+  };
+
+  populateSaveData = _ => {
+    return {
+      title: this.state.title,
+      headline: this.state.headline,
+      description: this.state.description,
+      published: this.state.published,
+      uploaded_cover_image: this.state.uploadedCoverImageId,
+      uploaded_trailer_video: this.state.uploadedTrailerVideoId,
+      category: this.state.category,
+      subcategory: this.state.subcategory,
+      language: this.state.language,
+      level: this.state.level,
+      instructor: this.state.instructor,
+      subscription_plans: this.state.subscriptionPlans,
+    };
+  };
+
+  refresh = _ => {
+    const { match: { params }, mode } = this.props;
+    let savedDataPromise = Promise.resolve(null);
+
+    this.fetchStart();
+
+    if (mode === 'update') {
+      savedDataPromise = this.courseService.getCourseLanding(params.id);
+    }
+
+    const subCategoryPromise = savedDataPromise.then(data => {
+      if (data) {
+        this.setState({
+          title: data.title,
+          headline: data.headline,
+          description: data.description,
+          published: data.published,
+          uploadedCoverImagePreview: data.uploaded_cover_image_preview,
+          uploadedCoverImageName: data.uploaded_cover_image_name,
+          uploadedCoverImageId: data.uploaded_cover_image,
+          uploadedTrailerVideoPreview: data.uploaded_trailer_video_preview,
+          uploadedTrailerVideoName: data.uploaded_trailer_video_name,
+          uploadedTrailerVideoId: data.uploaded_trailer_video,
+          category: data.category,
+          subcategory: data.subcategory,
+          language: data.language,
+          level: data.level,
+          instructor: data.instructor,
+          subscriptionPlans: data.subscription_plans,
+        });
+
+        // Fetch subcategories from backend
+        return this.categoryService.listSubCategories(data.category);
+      }
+
+      // Simulate subcategories data from backend
+      return { results: [] };
+    })
+
+    Promise.all([
+      this.languageService.listAllLanguages(),
+      this.levelService.listAllLevels(),
+      this.categoryService.listAllCategories(),
+      this.userService.listAllInstructors(),
+      this.subscriptionPlanService.listAllSubscriptionPlans(),
+      subCategoryPromise,
+    ])
+      .then(dataList => {
+        const languageData = dataList[0].results;
+        const levelData = dataList[1].results;
+        const categoryData = dataList[2].results;
+        const instructorData = dataList[3].results;
+        const allSubscriptionPlanData = dataList[4].results;
+        const subcategoryData = dataList[5].results;
+        const nextState = {
+          languages: languageData.map(item => ({ value: item.id, label: item.name })),
+          levels: levelData.map(item => ({ value: item.id, label: item.name })),
+          categories: categoryData.map(item => ({ value: item.id, label: item.name })),
+          instructors: instructorData.map(item => ({ value: item.id, label: item.full_name })),
+          allSubscriptionPlans: allSubscriptionPlanData.map(item => ({ value: item.id, label: item.name })),
+          subcategories: subcategoryData.map(item => ({ value: item.id, label: item.name })),
+        };
+
+        this.setState(nextState);
+      })
+      .catch(this.catchGeneralError)
+      .then(this.fetchEnd);
+  };
+
+  componentDidMount() {
+    this.refresh();
+  }
 
   render() {
-    const { 
-      classes, 
-      mode 
+    const {
+      classes,
+      mode
     } = this.props;
 
     const {
@@ -347,7 +412,7 @@ class CourseLanding extends React.PureComponent {
       openModUploadImage,
       openModUploadVideo,
     } = this.state;
-    
+
     return (
       <form className={classes.form}>
         {error.non_field_errors && (
@@ -361,11 +426,22 @@ class CourseLanding extends React.PureComponent {
             {error.detail}
           </Typography>
         )}
+        
+        <FormControlLabel
+          label='Publish This Course'
+          control={
+            <Switch
+              checked={published}
+              onChange={this.handleChange}
+              name='published'
+              color='primary'
+            />
+          }
+        />
 
         <TextField
           fullWidth
           required
-          autoFocus
           label='Title'
           name='title'
           margin='normal'
@@ -374,7 +450,7 @@ class CourseLanding extends React.PureComponent {
             shrink: true,
           }}
           value={title}
-          onChange={this.handleChange} 
+          onChange={this.handleChange}
           error={!!error.title}
           helperText={error.title}
         />
@@ -390,23 +466,16 @@ class CourseLanding extends React.PureComponent {
             shrink: true,
           }}
           value={headline}
-          onChange={this.handleChange} 
+          onChange={this.handleChange}
           error={!!error.headline}
           helperText={error.headline}
         />
 
-        {/* THIS SHOULD BE DRAFT JS */}
-        <TextField
-          fullWidth
+        <TextEditor
           label='Description'
           name='description'
-          margin='normal'
-          variant='filled'
-          InputLabelProps={{
-            shrink: true,
-          }}
           value={description}
-          onChange={this.handleChange} 
+          onChange={this.handleChange}
           error={!!error.description}
           helperText={error.description}
         />
@@ -519,9 +588,9 @@ class CourseLanding extends React.PureComponent {
         <Grid container spacing={24}>
           <Grid item xs={12} sm={6}>
             <img
-              alt='course image'
+              alt='course'
               style={{width: '100%'}}
-              src={uploadedCoverImagePreview 
+              src={uploadedCoverImagePreview
                 ? uploadedCoverImagePreview
                 : process.env.PUBLIC_URL + '/course_image.png'
               }
@@ -538,16 +607,16 @@ class CourseLanding extends React.PureComponent {
               Choose
               <FolderOpenIcon className={classes.rightIcon} />
             </Button>
-            <Button 
-              variant='contained' 
-              color='default' 
+            <Button
+              variant='contained'
+              color='default'
               className={classes.button}
               onClick={this.handleUploadImageOpen}
             >
               Upload
               <CloudUploadIcon className={classes.rightIcon} />
             </Button>
-            
+
             {uploadedCoverImageName && (
               <Chip
                 icon={<ImageIcon />}
@@ -584,8 +653,8 @@ class CourseLanding extends React.PureComponent {
               Choose
               <FolderOpenIcon className={classes.rightIcon} />
             </Button>
-            <Button 
-              variant='contained' 
+            <Button
+              variant='contained'
               color='default'
               className={classes.button}
               onClick={this.handleUploadVideoOpen}
@@ -605,8 +674,8 @@ class CourseLanding extends React.PureComponent {
             )}
           </Grid>
         </Grid>
-        
-        <ModSelectImage 
+
+        <ModSelectImage
           onClose={this.handleImageClose}
           onSelect={this.handleImageSelect}
           open={openModSelectImage}
@@ -636,9 +705,9 @@ class CourseLanding extends React.PureComponent {
           color='primary'
           loading={loading}
           className={classes.submit}
-          onClick={mode === 'create' ? this.handleSave : this.handleEdit}
+          onClick={this.handleSave}
         >
-          SAVE LANDING
+          {mode === 'create' ? 'SAVE LANDING' : 'UPDATE LANDING'}
         </LoadingButton>
       </form>
     );
@@ -646,7 +715,7 @@ class CourseLanding extends React.PureComponent {
 }
 
 CourseLanding.propTypes = {
-  mode: PropTypes.oneOf(['create', 'edit']).isRequired,
+  mode: PropTypes.oneOf(['create', 'update']).isRequired,
   onSaveSuccess: PropTypes.func,
 };
 
@@ -657,4 +726,5 @@ CourseLanding.defaultProps = {
 export default compose(
   withStyles(styles, { withTheme: true }),
   withSnackbar,
+  withRouter,
 )(CourseLanding);
