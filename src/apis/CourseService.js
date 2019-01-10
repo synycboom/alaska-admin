@@ -2,7 +2,7 @@ import BaseService from './BaseService';
 
 class CourseService extends BaseService {
   listCoursesLanding = (currentPage, pageSize) => {
-    return this.client.get('/admin-api/v1.0/courses-landing/', { 
+    return this.client.get('/admin-api/v1.0/courses/', { 
       params: { page: currentPage, page_size: pageSize }
     })
       .then(res => res.data)
@@ -10,27 +10,45 @@ class CourseService extends BaseService {
   };
 
   getCourseLanding = (id) => {
-    return this.client.get(`/admin-api/v1.0/courses-landing/${id}/`)
+    return this.client.get(`/admin-api/v1.0/courses/${id}/`)
       .then(res => res.data)
       .catch(this.handleError);
   };
 
   updateCourseLanding = (id, data) => {
-    return this.client.put(`/admin-api/v1.0/courses-landing/${id}/`, data)
+    return this.client.put(`/admin-api/v1.0/courses/${id}/`, data)
       .then(res => res.data)
       .catch(this.handleError);
   };
 
   deleteCourseLanding = (id) => {
-    return this.client.delete(`/admin-api/v1.0/courses-landing/${id}/`)
+    return this.client.delete(`/admin-api/v1.0/courses/${id}/`)
       .then(res => res.data)
       .catch(this.handleError);
   };
 
   createCourseLanding = (data) => {
-    return this.client.post('/admin-api/v1.0/courses-landing/', data)
+    return this.client.post('/admin-api/v1.0/courses/', data)
       .then(res => res.data)
       .catch(this.handleError);
+  };
+
+  // createSection = (id, data) => {
+  //   return this.client.post(`/admin-api/v1.0/courses/${id}/sections/`, data)
+  //   .then(res => res.data)
+  //   .catch(this.handleError);
+  // };
+
+  validateSection = (data) => {
+    return this.client.post(`/admin-api/v1.0/section-validate/`, data)
+    .then(res => res.data)
+    .catch(this.handleError);
+  };
+
+  validateLesson = (data) => {
+    return this.client.post(`/admin-api/v1.0/lesson-validate/`, data)
+    .then(res => res.data)
+    .catch(this.handleError);
   };
 }
 

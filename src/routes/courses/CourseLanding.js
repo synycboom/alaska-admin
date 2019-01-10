@@ -316,6 +316,7 @@ class CourseLanding extends React.PureComponent {
     }
 
     const subCategoryPromise = savedDataPromise.then(data => {
+      // the data will be null if mode is set to 'create'
       if (data) {
         this.setState({
           title: data.title,
@@ -337,7 +338,9 @@ class CourseLanding extends React.PureComponent {
         });
 
         // Fetch subcategories from backend
-        return this.categoryService.listSubCategories(data.category);
+        if (data.category) {
+          return this.categoryService.listSubCategories(data.category);
+        }
       }
 
       // Simulate subcategories data from backend

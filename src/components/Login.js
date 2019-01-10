@@ -93,6 +93,12 @@ class Login extends React.PureComponent {
       });
   };
 
+  handleKeyUp = event => {
+    if (event.keyCode === 13) {
+      this.handleLogin();
+    }
+  }
+
   handleChange = (event) => {
     this.setState({
       [event.target.name]: event.target.value
@@ -142,6 +148,7 @@ class Login extends React.PureComponent {
                 autoFocus
                 value={username}
                 onChange={this.handleChange} 
+                onKeyUp={this.handleKeyUp}
                 error={!!error.username}
               />
               {error.username && (
@@ -156,7 +163,8 @@ class Login extends React.PureComponent {
                 type='password' 
                 value={password}
                 autoComplete='current-password' 
-                onChange={this.handleChange} 
+                onChange={this.handleChange}
+                onKeyUp={this.handleKeyUp}
                 error={!!error.password}
               />
               {error.password && (

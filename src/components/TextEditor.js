@@ -178,13 +178,17 @@ class TextEditor extends React.PureComponent {
 
   componentDidUpdate(prevProps) {
     if (this.props.value && this.props.value !== prevProps.value) {
-      const derivedValue = JSON.parse(this.props.value);
-
-      this.setState({ 
-        editorState: EditorState.createWithContent(
-          convertFromRaw(derivedValue)
-        )
-      });
+      try {
+        const derivedValue = JSON.parse(this.props.value);
+        this.setState({ 
+          editorState: EditorState.createWithContent(
+            convertFromRaw(derivedValue)
+          )
+        });
+      } catch(syntaxError) {
+        console.error('You should check the text of this TextEditor, as it has an error below.');
+        console.error(syntaxError);
+      }
     }
   }
 
