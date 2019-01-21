@@ -101,7 +101,7 @@ class CourseEdit extends React.PureComponent {
         
         <br />
 
-        <Paper square>
+        {/* <Paper square>
           <Tabs 
             value={selectedTab} 
             indicatorColor='primary' 
@@ -115,7 +115,8 @@ class CourseEdit extends React.PureComponent {
         </Paper>
 
         {selectedTab === 0 && <CourseLanding mode='update'/>}
-        {selectedTab === 1 && <CourseCurriculum />}
+        {selectedTab === 1 && <CourseCurriculum />} */}
+        <CourseCurriculum />
 
       </Paper>
     );

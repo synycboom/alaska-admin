@@ -11,6 +11,13 @@ import Button from '@material-ui/core/Button';
 import CourseService from '../../apis/CourseService'; 
 import Section from './Section';
 import LoadingButton from '../../components/LoadingButton';
+import ModSelectVideo from '../uploaded-videos/ModSelectVideo';
+import ModUploadVideo from '../uploaded-videos/ModUploadVideo';
+import ModSelectFile from '../uploaded-files/ModSelectFile';
+import ModUploadFile from '../uploaded-files/ModUploadFile';
+
+import UploadedVideoService from '../../apis/UploadedVideoService';
+import UploadedFileService from '../../apis/UploadedFileService';
 
 // const initialData = {
 //   lessons: {
@@ -84,6 +91,8 @@ const INITIAL_LESSON_ERROR = {
 
 class CourseCurriculum extends React.PureComponent {
   courseService = new CourseService();
+  uploadedVideoService = new UploadedVideoService();
+  uploadedFileService = new UploadedFileService();
   state = {
     loading: false,
     lessons: {
@@ -91,6 +100,13 @@ class CourseCurriculum extends React.PureComponent {
     sections: {
     },
     sectionOrder: [],
+    openModSelectVideo: false,
+    openModUploadVideo: false,
+    openModUploadFile: false,
+    openModSelectFile: false,
+    // For using in Modal
+    currentSectionUUID: null,
+    currentLessonUUID: null,
   };
 
   onDragEnd = result => {
@@ -151,7 +167,7 @@ class CourseCurriculum extends React.PureComponent {
           ...finish,
           lessonUUIDs: finishLessonUUIDs
         };
-
+        
         this.setState({ sections: {
           ...this.state.sections,
           [newStart.uuid]: newStart,
@@ -320,13 +336,13 @@ class CourseCurriculum extends React.PureComponent {
     this.setState(newState);
   };
 
-  handleLessonDataChange = (id, name, value) => {
-    const lesson = this.state.lessons[id];
-
+  handleLessonDataChange = (lessonUUID, name, value) => {
+    const lesson = this.state.lessons[lessonUUID];
+    
     this.setState({
       lessons: {
         ...this.state.lessons,
-        [id]: {
+        [lessonUUID]: {
           ...lesson,
           [name]: value,
         }
@@ -401,10 +417,94 @@ class CourseCurriculum extends React.PureComponent {
       });
   };
 
+  handleOpenModSelectVideo = (currentLessonUUID) => {
+    this.setState({ openModSelectVideo: true, currentLessonUUID });
+  };
+  
+  handleOpenModUploadVideo = (currentLessonUUID) => {
+    this.setState({ openModUploadVideo: true, currentLessonUUID });
+  };
+
+  handleOpenModUploadFile = (currentLessonUUID) => {
+    this.setState({ openModUploadFile: true, currentLessonUUID });
+  };
+
+  handleOpenModSelectFile = (currentLessonUUID) => {
+    this.setState({ openModSelectFile: true, currentLessonUUID });
+  };
+
+  handleModSelectVideoClose = _ => {
+    this.setState({ openModSelectVideo: false, currentLessonUUID: null });
+  };
+
+  handleModUploadVideoClose = _ => {
+    this.setState({ openModUploadVideo: false, currentLessonUUID: null });
+  };
+
+  handleModSelectFileClose = _ => {
+    this.setState({ openModSelectFile: false, currentLessonUUID: null });
+  };
+
+  handleModUploadFileClose = _ => {
+    this.setState({ openModUploadFile: false, currentLessonUUID: null });
+  };
+
+  handleVideoSelect = (id) => {
+    this.uploadedVideoService.getUploadedVideo(id)
+      .then(data => {
+        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_video_name', data.name);
+        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_video', id);
+      })
+      .catch(this.catchGeneralError)
+      .then(_ => this.setState({
+        currentLessonUUID: null,
+        openModSelectVideo: false,
+      }));
+  };
+
+  handleUploadVideoSuccess = (id) => {
+    this.uploadedVideoService.getUploadedVideo(id)
+      .then(data => {
+        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_video_name', data.name);
+        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_video', id);
+      })
+      .catch(this.catchGeneralError)
+      .then(_ => this.setState({
+        currentLessonUUID: null,
+        openModUploadVideo: false,
+      }));
+  };
+
+  handleFileSelect = (id) => {
+    console.log('select', id)
+    this.uploadedFileService.getUploadedFile(id)
+      .then(data => {
+        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file_name', data.name);
+        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file', id);
+      })
+      .catch(this.catchGeneralError)
+      .then(_ => this.setState({
+        currentLessonUUID: null,
+        openModSelectFile: false,
+      }));
+  };
+
+  handleUploadFileSuccess = (id) => {
+    this.uploadedFileService.getUploadedFile(id)
+      .then(data => {
+        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file_name', data.name);
+        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file', id);
+      })
+      .catch(this.catchGeneralError)
+      .then(_ => this.setState({
+        currentLessonUUID: null,
+        openModUploadFile: false,
+      }));
+  };
+
   handleSave = _ => {
     const { match: { params } } = this.props;
     const derivedSections = this.getSectionsForSave();
-    console.log(derivedSections)
   };
 
   catchError = error => {
@@ -482,7 +582,7 @@ class CourseCurriculum extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { loading } = this.state;
+    const { loading, openModSelectVideo, openModUploadVideo, openModUploadFile, openModSelectFile } = this.state;
     const derivedSections = this.getDerivedSections();
 
     return (
@@ -521,6 +621,10 @@ class CourseCurriculum extends React.PureComponent {
                       onLessonDataChange={this.handleLessonDataChange}
                       onCancelLesson={this.handleLessonCancel}
                       onSaveLesson={this.handleLessonSave}
+                      onOpenModSelectVideo={this.handleOpenModSelectVideo}
+                      onOpenModUploadVideo={this.handleOpenModUploadVideo}
+                      onOpenModUploadFile={this.handleOpenModUploadFile}
+                      onOpenModSelectFile={this.handleOpenModSelectFile}
                     />
                   )) : (
                     <Button variant='outlined' onClick={this.handleAddNewSection}>
@@ -544,6 +648,31 @@ class CourseCurriculum extends React.PureComponent {
         >
           SAVE CURRICULUM
         </LoadingButton>
+
+        <ModSelectVideo
+          onClose={this.handleModSelectVideoClose}
+          onSelect={this.handleVideoSelect}
+          open={openModSelectVideo}
+        />
+
+        <ModUploadVideo
+          onClose={this.handleModUploadVideoClose}
+          onSaveSuccess={this.handleUploadVideoSuccess}
+          open={openModUploadVideo}
+        />
+
+        <ModSelectFile
+          onClose={this.handleModSelectFileClose}
+          onSelect={this.handleFileSelect}
+          open={openModSelectFile}
+        />
+
+        <ModUploadFile
+          onClose={this.handleModUploadFileClose}
+          onSaveSuccess={this.handleUploadFileSuccess}
+          open={openModUploadFile}
+        />
+
       </React.Fragment>
     );
   }

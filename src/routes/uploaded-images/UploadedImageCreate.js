@@ -151,7 +151,7 @@ class UploadedImageCreate extends React.PureComponent {
     this.uploadedImageService.createUploadedImage(formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
-        onSaveSuccess(data.id)
+        onSaveSuccess(data.id);
         this.handleBack();
       })
       .catch(this.catchError)

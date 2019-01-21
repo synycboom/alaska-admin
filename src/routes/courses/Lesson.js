@@ -10,7 +10,15 @@ import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import VideocamIcon from '@material-ui/icons/Videocam';
+import ReceiptIcon from '@material-ui/icons/Receipt';
 import DehazeIcon from '@material-ui/icons/Dehaze';
+import FolderOpenIcon from '@material-ui/icons/FolderOpen';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import Chip from '@material-ui/core/Chip';
+import BottomNavigation from '@material-ui/core/BottomNavigation';
+import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 
 const styles = theme => ({
   container: {
@@ -66,7 +74,18 @@ const styles = theme => ({
   },
   cancelButton: {
     marginRight: '5px',
-  }
+  },
+  bottomNavigation: {
+    border: '1px solid #e2e2e2'
+  },
+  editingSection: {
+    borderWidth: '0px 1px 1px 1px',
+    borderStyle: 'solid',
+    borderColor: '#e2e2e2',
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '10px',
+  },
 });
 
 const LessonHeader = ({classes, index, title, published}) => (
@@ -83,33 +102,80 @@ const LessonHeader = ({classes, index, title, published}) => (
 );
 
 class Lesson extends React.PureComponent {
-  state = {
-    selectedType: null
-  }
-
   renderVideoComponent = _ => {
+    const { classes, uploadedLessonVideoName } = this.props;
+    return (
+      <div>
+        <Button
+          variant='contained'
+          color='secondary'
+          className={classes.button}
+          onClick={this.handleOpenModSelectVideo}
+        >
+          Choose
+          <FolderOpenIcon className={classes.rightIcon} />
+        </Button>
+        <Button
+          variant='contained'
+          color='default'
+          className={classes.button}
+          onClick={this.handleOpenModUploadVideo}
+        >
+          Upload
+          <CloudUploadIcon className={classes.rightIcon} />
+        </Button>
 
+        {uploadedLessonVideoName && (
+          <Chip
+            icon={<VideocamIcon />}
+            label={`File: ${uploadedLessonVideoName}`}
+            clickable
+            color='primary'
+            onDelete={this.handleDiscardVideo}
+          />
+        )}
+      </div>
+    );
+  };
+
+  renderFileComponent = _ => {
+    const { classes, uploadedLessonFileName } = this.props;
+    return (
+      <div>
+        <Button
+          variant='contained'
+          color='secondary'
+          className={classes.button}
+          onClick={this.handleOpenModSelectFile}
+        >
+          Choose
+          <FolderOpenIcon className={classes.rightIcon} />
+        </Button>
+        <Button
+          variant='contained'
+          color='default'
+          className={classes.button}
+          onClick={this.handleOpenModUploadFile}
+        >
+          Upload
+          <CloudUploadIcon className={classes.rightIcon} />
+        </Button>
+
+        {uploadedLessonFileName && (
+          <Chip
+            icon={<VideocamIcon />}
+            label={`File: ${uploadedLessonFileName}`}
+            clickable
+            color='primary'
+            onDelete={this.handleDiscardFile}
+          />
+        )}
+      </div>
+    );
   };
 
   renderArticleComponent = _ => {
 
-  };
-
-  renderFileComponent = _ => {
-
-  };
-
-  renderChoosingComponent = _ => {
-    const { classes } = this.props;
-
-    return (
-      <div>
-        <Fab variant="extended" aria-label="Delete" className={classes.fab}>
-          <AddIcon className={classes.addForChoosingIcon} />
-          Extended
-        </Fab>
-      </div>
-    );
   };
 
   handleChange = (event, checked) => {
@@ -118,6 +184,63 @@ class Lesson extends React.PureComponent {
       event.target.name,
       checked || event.target.value
     );
+  };
+
+  handleTypeChange = (_, value) => {
+    this.props.onChange(
+      this.props.draggableId,
+      'type',
+      value,
+    );
+  };
+
+  handleDiscardVideo = _ => {
+    this.props.onChange(
+      this.props.draggableId,
+      'uploaded_lesson_video_name',
+      '',
+    );
+    
+    // WTF happens here, It won't work if we don't wrap the onChange() in setTimeout?
+    setTimeout(_ => {
+      this.props.onChange(
+        this.props.draggableId,
+        'uploaded_lesson_video',
+        null,
+      );
+    });
+  };
+
+  handleDiscardFile = _ => {
+    this.props.onChange(
+      this.props.draggableId,
+      'uploaded_lesson_file_name',
+      '',
+    );
+
+    setTimeout(_ => {
+      this.props.onChange(
+        this.props.draggableId,
+        'uploaded_lesson_file',
+        null,
+      );
+    });
+  };
+
+  handleOpenModUploadVideo = () => {
+    this.props.onOpenModUploadVideo(this.props.draggableId);
+  };
+
+  handleOpenModUploadFile = () => {
+    this.props.onOpenModUploadFile(this.props.draggableId);
+  };
+
+  handleOpenModSelectFile = () => {
+    this.props.onOpenModSelectFile(this.props.draggableId);
+  };
+
+  handleOpenModSelectVideo = () => {
+    this.props.onOpenModSelectVideo(this.props.draggableId);
   };
 
   handleCancel = _ => {
@@ -129,7 +252,6 @@ class Lesson extends React.PureComponent {
   };
 
   render() {
-    const { selectedType } = this.state;
     const {
       classes,
       key,
@@ -147,7 +269,7 @@ class Lesson extends React.PureComponent {
 
     let EditingComponent = null;
 
-    switch(selectedType) {
+    switch(type) {
       case 'video':
         EditingComponent = this.renderVideoComponent();
         break;
@@ -157,14 +279,12 @@ class Lesson extends React.PureComponent {
       case 'article':
         EditingComponent = this.renderArticleComponent();
         break;
-      default:
-        EditingComponent = this.renderChoosingComponent();
     }
 
     return (
       <Draggable 
         type='LESSON'
-        index={index + 1}
+        index={index}
         draggableId={draggableId} 
       >
         {provided => (
@@ -201,6 +321,19 @@ class Lesson extends React.PureComponent {
                   error={!!error.title}
                   helperText={error.title}
                 />
+
+                <BottomNavigation value={type} onChange={this.handleTypeChange} className={classes.bottomNavigation}>
+                  <BottomNavigationAction label='Video' value='video' icon={<VideocamIcon />} />
+                  <BottomNavigationAction label='File' value='file' icon={<FileCopyIcon />} />
+                  <BottomNavigationAction label='Article' value='article' icon={<ReceiptIcon />} />
+                </BottomNavigation>
+                
+                {EditingComponent && (
+                  <div className={classes.editingSection}>
+                    {EditingComponent}
+                  </div>
+                )}
+
                 <div className={classes.savePanel}>
                   <Button
                     variant='outlined'
@@ -220,6 +353,7 @@ class Lesson extends React.PureComponent {
                 <LessonHeader 
                   title={title}
                   classes={classes}
+                  index={index + 1}
                 />
                 <div className={classes.addButtonContainer}>
                   <button className={classes.addIcon} onClick={_ => {
@@ -247,11 +381,17 @@ Lesson.propTypes = {
   title: PropTypes.string,
   published: PropTypes.bool,
   article: PropTypes.string,
+  uploadedLessonVideoName: PropTypes.string,
   uploadedLessonVideo: PropTypes.number,
+  uploadedLessonFileName: PropTypes.string,
   uploadedLessonFile: PropTypes.number,
   onCreateNewSection: PropTypes.func,
   onEditSectionClick: PropTypes.func,
   onDeleteSectionClick: PropTypes.func,
+  onOpenModSelectVideo: PropTypes.func,
+  onOpenModUploadVideo: PropTypes.func,
+  onOpenModUploadFile: PropTypes.func,
+  onOpenModSelectFile: PropTypes.func,
   onChange: PropTypes.func,
   onCancel: PropTypes.func,
   onSave: PropTypes.func,

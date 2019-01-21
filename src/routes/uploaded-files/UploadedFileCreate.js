@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { withSnackbar } from 'notistack';
 import compose from 'recompose/compose';
 import Dropzone from 'react-dropzone';
@@ -110,7 +111,7 @@ class UploadedFileCreate extends React.PureComponent {
   }
 
   handleSave = () => {
-    const { enqueueSnackbar } = this.props;
+    const { enqueueSnackbar, onSaveSuccess } = this.props;
     const { name, file, tags } = this.state;
     const formData = new FormData();
     
@@ -125,6 +126,7 @@ class UploadedFileCreate extends React.PureComponent {
     this.uploadedFileService.createUploadedFile(formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
+        onSaveSuccess(data.id);
         this.handleBack();
       })
       .catch(this.catchError)
@@ -136,11 +138,13 @@ class UploadedFileCreate extends React.PureComponent {
   }
 
   handleBack = () => {
-    this.props.history.goBack();
+    if (!this.props.withoutHeader) {
+      this.props.history.goBack();
+    }
   }
   
   render() {
-    const { classes } = this.props;
+    const { classes,  withoutHeader } = this.props;
     const {
       error,
       name,
@@ -155,6 +159,7 @@ class UploadedFileCreate extends React.PureComponent {
         onSave={this.handleSave} 
         onBack={this.handleBack} 
         loading={loading}
+        withoutHeader={withoutHeader}
         text='Upload File'
       >
         <React.Fragment>
@@ -225,6 +230,16 @@ class UploadedFileCreate extends React.PureComponent {
     );
   }
 }
+
+UploadedFileCreate.propTypes = {
+  classes: PropTypes.object.isRequired,
+  withoutHeader: PropTypes.bool,
+  onSaveSuccess: PropTypes.func,
+}
+
+UploadedFileCreate.defaultProps = {
+  onSaveSuccess() {},
+};
 
 export default compose(
   withStyles(styles, { withTheme: true }),

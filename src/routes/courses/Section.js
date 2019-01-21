@@ -144,6 +144,10 @@ class Section extends React.PureComponent {
       error,
 
       onLessonDataChange,
+      onOpenModSelectVideo,
+      onOpenModUploadVideo,
+      onOpenModUploadFile,
+      onOpenModSelectFile,
     } = this.props;
 
     console.log(lessons)
@@ -243,10 +247,16 @@ class Section extends React.PureComponent {
                           error={lesson.error}
                           type={lesson.type}
                           title={lesson.title}
-                          uploadedLessonVideo={lesson.uploaded_lesson_video_preview}
-                          uploadedLessonFile={lesson.uploaded_lesson_file_preview}
+                          uploadedLessonVideoName={lesson.uploaded_lesson_video_name}
+                          uploadedLessonVideo={lesson.uploaded_lesson_video}
+                          uploadedLessonFileName={lesson.uploaded_lesson_file_name}
+                          uploadedLessonFile={lesson.uploaded_lesson_file}
                           article={lesson.article}
                           published={lesson.published}
+                          onOpenModSelectVideo={onOpenModSelectVideo}
+                          onOpenModUploadVideo={onOpenModUploadVideo}
+                          onOpenModUploadFile={onOpenModUploadFile}
+                          onOpenModSelectFile={onOpenModSelectFile}
                           onChange={onLessonDataChange}
                           onCancel={this.handleCancelLesson}
                           onSave={this.handleSaveLesson}
@@ -295,6 +305,10 @@ Section.propTypes = {
   onLessonDataChange: PropTypes.func,
   onCancelLesson: PropTypes.func,
   onSaveLesson: PropTypes.func,
+  onOpenModSelectVideo: PropTypes.func,
+  onOpenModUploadVideo: PropTypes.func,
+  onOpenModUploadFile: PropTypes.func,
+  onOpenModSelectFile: PropTypes.func,
 };
 
 export default compose(
