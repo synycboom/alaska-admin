@@ -131,7 +131,7 @@ class CourseLanding extends React.PureComponent {
 
   handleChange = (event, checked) => {
     this.setState({
-      [event.target.name]: checked || event.target.value
+      [event.target.name]: typeof checked === 'undefined' ? event.target.value : checked
     });
   };
 

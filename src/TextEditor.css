@@ -6,6 +6,7 @@
   /* font-family: 'Georgia', serif; */
   font-size: 14px;
   padding: 10px 12px 10px;
+  width: 100%;
 }
 
 .RichEditor-root.error {

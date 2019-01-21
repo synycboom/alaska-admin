@@ -107,7 +107,7 @@ class CourseEdit extends React.PureComponent {
             indicatorColor='primary' 
             textColor='primary' 
             onChange={this.handleTabChange}
-            fullWidth
+            variant='fullWidth'
           >
             <Tab label='Landing' className={classes.landingTab}/>
             <Tab label='Curriculum' className={classes.curriculumTab}/>
@@ -116,6 +116,7 @@ class CourseEdit extends React.PureComponent {
 
         {selectedTab === 0 && <CourseLanding mode='update'/>}
         {selectedTab === 1 && <CourseCurriculum />} */}
+        
         <CourseCurriculum />
 
       </Paper>

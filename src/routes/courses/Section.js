@@ -6,13 +6,20 @@ import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import DehazeIcon from '@material-ui/icons/Dehaze';
 import AddIcon from '@material-ui/icons/Add';
 import Lesson from './Lesson';
 
 const styles = theme => ({
+  nonFieldError: {
+    color: theme.palette.error.main,
+  },
   container: {
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
@@ -25,15 +32,16 @@ const styles = theme => ({
   header: {
     display: 'flex',
     marginBottom: '10px',
+    alignItems: 'center',
     paddingTop: theme.spacing.unit * 2,
     paddingBottom: theme.spacing.unit * 2,
     '&:hover $hoverContainer': {
-      visibility: 'visible',
+      opacity: 1,
     },
   },
   hoverContainer: {
     display: 'flex',
-    visibility: 'hidden',
+    opacity: 0.1,
     flexGrow: 1,
   },
   sectionName: {
@@ -53,11 +61,11 @@ const styles = theme => ({
     left: '-20px',
     zIndex: 1,
     '&:hover $addIcon': {
-      visibility: 'visible',
+      opacity: 1,
     },
   },
   addIcon: {
-    visibility: 'hidden',
+    opacity: 0.5,
     background: 'white',
     border: 'solid 1px #cac1c1',
     cursor: 'pointer',
@@ -72,9 +80,14 @@ const styles = theme => ({
 });
 
 
-const SectionHeader = ({classes, index, title, description, published , onEditClick, onDeleteClick}) => (
+const SectionHeader = ({classes, index, title, published , onEditClick, onDeleteClick}) => (
   <div className={classes.header}>
-    <span>Section {index}: </span>
+    {published ? (
+      <CheckCircleOutlineIcon color='primary'/>
+    ) : (
+      <HighlightOffIcon color='secondary'/>
+    )}
+    <span>&nbsp; Section {index}: </span>
     <span className={classes.sectionName}>&nbsp;{title}</span>
     <div className={classes.hoverContainer}>
       <EditIcon className={classes.headerIcon} fontSize='small' onClick={onEditClick}/>
@@ -94,7 +107,7 @@ class Section extends React.PureComponent {
     this.props.onSectionDataChange(
       this.props.draggableId,
       event.target.name,
-      checked || event.target.value
+      typeof checked === 'undefined' ? event.target.value : checked
     );
   };
 
@@ -107,7 +120,11 @@ class Section extends React.PureComponent {
   };
 
   handleCancel = _ => {
-    this.props.onCancelSection(this.props.draggableId);
+    if (this.props.isCreated) {
+      this.props.onCancelSection(this.props.draggableId);
+    } else {
+      this.props.onDeleteSectionClick(this.props.draggableId);
+    }
   };
 
   handleSave = _ => {
@@ -119,17 +136,25 @@ class Section extends React.PureComponent {
   };
 
   // ----------------------------------------------------------------- LESSON
-  handleAddNewLesson = index => {
-    this.props.onAddNewLesson(this.props.draggableId, index)
+  handleAddLesson = index => {
+    this.props.onAddLesson(this.props.draggableId, index)
   };
 
   handleCancelLesson = lessonUUID => {
     this.props.onCancelLesson(this.props.draggableId, lessonUUID);
-  }
+  };
+
+  handleDeleteLesson = lessonUUID => {
+    this.props.onDeleteLesson(this.props.draggableId, lessonUUID);
+  };
+
+  handleEditLesson = lessonUUID => {
+    this.props.onEditLesson(this.props.draggableId, lessonUUID);
+  };
 
   handleSaveLesson = lessonUUID => {
     this.props.onSaveLesson(this.props.draggableId, lessonUUID);
-  }
+  };
 
   render() {
     const {
@@ -141,6 +166,7 @@ class Section extends React.PureComponent {
       published,
       lessons,
       isEditing,
+      isCreated,
       error,
 
       onLessonDataChange,
@@ -149,8 +175,6 @@ class Section extends React.PureComponent {
       onOpenModUploadFile,
       onOpenModSelectFile,
     } = this.props;
-
-    console.log(lessons)
 
     return (
       <Draggable
@@ -206,17 +230,35 @@ class Section extends React.PureComponent {
                   error={!!error.description}
                   helperText={error.description}
                 />
+                <FormControlLabel
+                  label='Publish This Section'
+                  control={
+                    <Switch
+                      checked={published}
+                      onChange={this.handleChange}
+                      name='published'
+                      color='primary'
+                    />
+                  }
+                />
                 <div className={classes.savePanel}>
-                  <Button
-                    variant='outlined'
-                    color='secondary'
-                    className={classes.cancelButton}
-                    onClick={this.handleCancel}
+                  {!isCreated && (
+                    <Button
+                      variant='outlined'
+                      color='secondary'
+                      className={classes.cancelButton}
+                      onClick={this.handleCancel}
+                    >
+                      CANCEL
+                    </Button>
+                  )}
+
+                  <Button 
+                    variant='outlined' 
+                    color='primary' 
+                    onClick={this.handleSave}
                   >
-                    Cancel
-                  </Button>
-                  <Button variant='outlined' color='primary' onClick={this.handleSave}>
-                    Save Section
+                    OK
                   </Button>
                 </div>
               </div>
@@ -244,6 +286,7 @@ class Section extends React.PureComponent {
                           draggableId={lesson.uuid}
                           index={index}
                           isEditing={lesson.isEditing}
+                          isCreated={lesson.isCreated}
                           error={lesson.error}
                           type={lesson.type}
                           title={lesson.title}
@@ -257,12 +300,15 @@ class Section extends React.PureComponent {
                           onOpenModUploadVideo={onOpenModUploadVideo}
                           onOpenModUploadFile={onOpenModUploadFile}
                           onOpenModSelectFile={onOpenModSelectFile}
+                          onAddLesson={this.handleAddLesson}
                           onChange={onLessonDataChange}
                           onCancel={this.handleCancelLesson}
+                          onDeleteLesson={this.handleDeleteLesson}
+                          onEditLesson={this.handleEditLesson}
                           onSave={this.handleSaveLesson}
                         />
                       )) : (
-                        <Button variant='outlined' onClick={this.handleAddNewLesson}>
+                        <Button variant='outlined' onClick={this.handleAddLesson}>
                           New Lesson
                         </Button>
                       )}
@@ -288,6 +334,7 @@ Section.propTypes = {
   classes: PropTypes.object,
   error: PropTypes.object,
   isEditing: PropTypes.bool,
+  isCreated: PropTypes.bool,
   draggableId: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
   title: PropTypes.string,
@@ -301,9 +348,11 @@ Section.propTypes = {
   onSaveSection: PropTypes.func,
   onCancelSection: PropTypes.func,
 
-  onAddNewLesson: PropTypes.func,
+  onAddLesson: PropTypes.func,
   onLessonDataChange: PropTypes.func,
   onCancelLesson: PropTypes.func,
+  onDeleteLesson: PropTypes.func,
+  onEditLesson: PropTypes.func,
   onSaveLesson: PropTypes.func,
   onOpenModSelectVideo: PropTypes.func,
   onOpenModUploadVideo: PropTypes.func,

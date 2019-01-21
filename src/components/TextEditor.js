@@ -166,29 +166,29 @@ class TextEditor extends React.PureComponent {
     );
   };
 
-  componentDidMount() {
-    if (this.props.value) {
+  initialState = _ => {
+    try {
+      const derivedValue = JSON.parse(this.props.value);
       this.setState({ 
         editorState: EditorState.createWithContent(
-          convertFromRaw(this.props.value)
+          convertFromRaw(derivedValue)
         )
       });
+    } catch(syntaxError) {
+      console.error('You should check the text of this TextEditor, as it has an error below.');
+      console.error(syntaxError);
+    }
+  };
+
+  componentDidMount() {
+    if (this.props.value) {
+      this.initialState();
     }
   }
 
   componentDidUpdate(prevProps) {
     if (this.props.value && this.props.value !== prevProps.value) {
-      try {
-        const derivedValue = JSON.parse(this.props.value);
-        this.setState({ 
-          editorState: EditorState.createWithContent(
-            convertFromRaw(derivedValue)
-          )
-        });
-      } catch(syntaxError) {
-        console.error('You should check the text of this TextEditor, as it has an error below.');
-        console.error(syntaxError);
-      }
+      this.initialState();
     }
   }
 

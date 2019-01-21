@@ -187,6 +187,7 @@ class CourseCurriculum extends React.PureComponent {
           title: '',
           description: '',
           isEditing: true,
+          isCreated: false,
           lessonUUIDs: [],
           published: false,
           error: {
@@ -232,10 +233,6 @@ class CourseCurriculum extends React.PureComponent {
   };
 
   handleDeleteSectionClick = (id) => {
-    this.handleSectionCancel(id);
-  };
-
-  handleSectionCancel = id => {
     const sectionOrder = this.state.sectionOrder.filter(sectionId => sectionId !== id);
     const sections = { ...this.state.sections };
     // TODO: Check if we need to delete lessons?
@@ -244,8 +241,17 @@ class CourseCurriculum extends React.PureComponent {
     this.setState({ sections, sectionOrder });
   };
 
+  handleSectionCancel = id => {
+    const section = this.state.sections[id];
+    this.setState({
+      sections: {
+        ...this.state.sections,
+        [id]: { ...section, isEditing: false }
+      }
+    });
+  };
+
   handleSectionSave = id => {
-    const { enqueueSnackbar } = this.props;
     const section = this.state.sections[id];
     const index = this.state.sectionOrder.indexOf(id) + 1;
     const data = {
@@ -256,48 +262,16 @@ class CourseCurriculum extends React.PureComponent {
       published: section.published,
     };
 
-    // Clear error on this section
-    this.setState({
-      sections: {
-        ...this.state.sections,
-        [id]: { ...section, error: { ...INITIAL_SECTION_ERROR } }
-      }
-    });
-
     this.courseService.validateSection(data)
-      .then(data => {
-        // Set isEditing to false
-        this.setState({
-          sections: {
-            ...this.state.sections,
-            [id]: { ...section, isEditing: false }
-          }
-        });
+      .then(_ => {
+        this.clearErrorAndReset('sections', section)
       })
-      .catch(error => {
-        let newError = {};
-
-        for (let key in error) {
-          if (error.hasOwnProperty(key)) {
-            newError[key] = error[key];
-          }
-        }
-
-        // Set error to this section
-        this.setState({
-          sections: {
-            ...this.state.sections,
-            [id]: { ...section, error: newError }
-          }
-        });
-
-        enqueueSnackbar('The action was not success.', { variant: 'error' });
-      });
+      .catch(this.catchError('sections', section));
   };
 
   // ------------------------------------------------------------------ LESSON
 
-  handleAddNewLesson = (sectionId, index) => {
+  handleAddLesson = (sectionId, index) => {
     const section = this.state.sections[sectionId];
     const newId = uuidv4();
     const newState = {
@@ -307,10 +281,11 @@ class CourseCurriculum extends React.PureComponent {
           uuid: newId,
           type: null,
           title: '',
-          article: '',
+          article: null,
           uploadedLessonVideo: null,
           uploadedLessonFile: null,
           isEditing: true,
+          isCreated: false,
           published: false,
           error: {
            ...INITIAL_LESSON_ERROR 
@@ -351,6 +326,20 @@ class CourseCurriculum extends React.PureComponent {
   };
 
   handleLessonCancel = (sectionUUID, lessonUUID)  => {
+    const lesson = this.state.lessons[lessonUUID];
+    
+    this.setState({
+      lessons: {
+        ...this.state.lessons,
+        [lessonUUID]: {
+          ...lesson,
+          isEditing: false,
+        }
+      }
+    });
+  };
+
+  handleDeleteLesson = (sectionUUID, lessonUUID) => {
     const sections = this.state.sections;
     const section = sections[sectionUUID];
     const newSections = {
@@ -366,55 +355,44 @@ class CourseCurriculum extends React.PureComponent {
     this.setState({ lessons: newLessons, sections: newSections });
   };
 
-  handleLessonSave = id => {
-    const { enqueueSnackbar } = this.props;
-    const section = this.state.sections[id];
-    const index = this.state.sectionOrder.indexOf(id) + 1;
-    const data = {
-      uuid: id,
-      title: section.title,
-      sort_order: index,
-      description: section.description,
-      published: section.published,
-    };
-
-    // Clear error on this section
+  handleEditLesson = (sectionUUID, lessonUUID) => {
+    const lesson = this.state.lessons[lessonUUID];
+    
     this.setState({
-      sections: {
-        ...this.state.sections,
-        [id]: { ...section, error: { ...INITIAL_SECTION_ERROR } }
+      lessons: {
+        ...this.state.lessons,
+        [lessonUUID]: {
+          ...lesson,
+          isEditing: true,
+        }
       }
     });
 
+  };
+
+  handleLessonSave = (sectionUUID, lessonUUID) => {
+    const { enqueueSnackbar } = this.props;
+    const lesson = this.state.lessons[lessonUUID];
+    const index = this.state.sections[sectionUUID].lessonUUIDs.indexOf(lesson.uuid) + 1;
+
+    const data = {
+      uuid: lesson.uuid,
+      title: lesson.title,
+      sort_order: index,
+      published: lesson.published,
+      type: lesson.type,
+      uploaded_lesson_video: lesson.uploaded_lesson_video,
+      uploaded_lesson_file: lesson.uploaded_lesson_file,
+      article: lesson.article,
+    };
+
+    ;
+
     this.courseService.validateLesson(data)
-      .then(data => {
-        // Set isEditing to false
-        this.setState({
-          sections: {
-            ...this.state.sections,
-            [id]: { ...section, isEditing: false }
-          }
-        });
+      .then(_ => {
+        this.clearErrorAndReset('lessons', lesson)
       })
-      .catch(error => {
-        let newError = {};
-
-        for (let key in error) {
-          if (error.hasOwnProperty(key)) {
-            newError[key] = error[key];
-          }
-        }
-
-        // Set error to this section
-        this.setState({
-          sections: {
-            ...this.state.sections,
-            [id]: { ...section, error: newError }
-          }
-        });
-
-        enqueueSnackbar('The action was not success.', { variant: 'error' });
-      });
+      .catch(this.catchError('lessons', lesson));
   };
 
   handleOpenModSelectVideo = (currentLessonUUID) => {
@@ -476,7 +454,6 @@ class CourseCurriculum extends React.PureComponent {
   };
 
   handleFileSelect = (id) => {
-    console.log('select', id)
     this.uploadedFileService.getUploadedFile(id)
       .then(data => {
         this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file_name', data.name);
@@ -505,9 +482,26 @@ class CourseCurriculum extends React.PureComponent {
   handleSave = _ => {
     const { match: { params } } = this.props;
     const derivedSections = this.getSectionsForSave();
+    console.log(derivedSections)
   };
 
-  catchError = error => {
+  clearErrorAndReset = (type, sectionOrLesson) => {
+    this.setState({
+      [type]: {
+        ...this.state[type],
+        [sectionOrLesson.uuid]: { 
+          ...sectionOrLesson, 
+          isEditing: false,
+          isCreated: true,
+          error: {
+            ...(type === 'sections' ? INITIAL_SECTION_ERROR : INITIAL_LESSON_ERROR) 
+          },
+        }
+      }
+    });
+  };
+
+  catchError = (type, sectionOrLesson) => error => {
     let newError = {};
 
     for (let key in error) {
@@ -516,8 +510,14 @@ class CourseCurriculum extends React.PureComponent {
       }
     }
 
+    this.setState({
+      [type]: {
+        ...this.state[type],
+        [sectionOrLesson.uuid]: { ...sectionOrLesson, error: newError }
+      }
+    });
+
     this.props.enqueueSnackbar('The action was not success.', { variant: 'error' });
-    this.setState({error: newError});
   };
 
   getSectionsForSave = _ => {
@@ -543,7 +543,6 @@ class CourseCurriculum extends React.PureComponent {
           section_uuid: section.uuid,
           type: lesson.type,
           title: lesson.title,
-          uploaded_video_cover_image: lesson.uploadedVideoCoverImage,
           uploaded_lesson_video: lesson.uploadedLessonVideo,
           uploaded_lesson_file: lesson.uploadedLessonFile,
           article: lesson.article,
@@ -602,6 +601,7 @@ class CourseCurriculum extends React.PureComponent {
                       draggableId={section.uuid}
                       index={index}
                       title={section.title}
+                      isCreated={section.isCreated}
                       isEditing={section.isEditing}
                       description={section.description}
                       published={section.published}
@@ -617,9 +617,11 @@ class CourseCurriculum extends React.PureComponent {
                       onCancelSection={this.handleSectionCancel}
                       
                       // LESSON
-                      onAddNewLesson={this.handleAddNewLesson}
+                      onAddLesson={this.handleAddLesson}
                       onLessonDataChange={this.handleLessonDataChange}
                       onCancelLesson={this.handleLessonCancel}
+                      onDeleteLesson={this.handleDeleteLesson}
+                      onEditLesson={this.handleEditLesson}
                       onSaveLesson={this.handleLessonSave}
                       onOpenModSelectVideo={this.handleOpenModSelectVideo}
                       onOpenModUploadVideo={this.handleOpenModUploadVideo}
