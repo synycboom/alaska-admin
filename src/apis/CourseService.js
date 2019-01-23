@@ -33,6 +33,18 @@ class CourseService extends BaseService {
       .catch(this.handleError);
   };
 
+  getCurriculum = (id) => {
+    return this.client.get(`/admin-api/v1.0/courses/${id}/curriculum/`)
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+
+  createCurriculum = (id, data) => {
+    return this.client.put(`/admin-api/v1.0/courses/${id}/curriculum/`, data)
+      .then(res => res.data)
+      .catch(this.handleError);
+  };
+
   validateSection = (data) => {
     return this.client.post(`/admin-api/v1.0/section-validate/`, data)
     .then(res => res.data)

@@ -1,5 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import uuidv4 from 'uuid/v4';
+import JSONPretty from 'react-json-pretty';
 import Paper from '@material-ui/core/Paper';
 import compose from 'recompose/compose';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
@@ -19,41 +21,6 @@ import ModUploadFile from '../uploaded-files/ModUploadFile';
 import UploadedVideoService from '../../apis/UploadedVideoService';
 import UploadedFileService from '../../apis/UploadedFileService';
 
-// const initialData = {
-//   lessons: {
-//     'lesson-1': { 
-//       id: 'lesson-1', 
-//       title: 'lesson-1' 
-//       isSave: true,
-//     },
-//     'lesson-2': { 
-//       id: 'lesson-2', 
-//       title: 'lesson-2' 
-//       isSave: true,
-//     },
-//     'lesson-3': { 
-//       id: 'lesson-3', 
-//       title: 'lesson-3' 
-//       isSave: true,
-//     },
-//   },
-//   sections: {
-//     'section-1': {
-//       id: 'section-1',
-//       name: 'section-1',
-//       isSave: true,
-//       lessonUUIDs: ['lesson-1', 'lesson-2']
-//     },
-//     'section-2': {
-//       id: 'section-2',
-//       name: 'section-2',
-//       isSave: true,
-//       lessonUUIDs: ['lesson-3']
-//     },
-//   },
-//   sectionOrder: ['section-1', 'section-2']
-// };
-
 const styles = theme => ({
   paper: {
     ...theme.mixins.gutters(),
@@ -69,6 +36,9 @@ const styles = theme => ({
   submit: {
     marginTop: theme.spacing.unit * 3,
   },
+  errorSection: {
+    padding: '20px',
+  }
 });
 
 const INITIAL_SECTION_ERROR = {
@@ -89,6 +59,8 @@ const INITIAL_LESSON_ERROR = {
   detail: '',
 };
 
+const INITIAL_ERROR = null;
+
 class CourseCurriculum extends React.PureComponent {
   courseService = new CourseService();
   uploadedVideoService = new UploadedVideoService();
@@ -107,6 +79,7 @@ class CourseCurriculum extends React.PureComponent {
     // For using in Modal
     currentSectionUUID: null,
     currentLessonUUID: null,
+    error: INITIAL_ERROR,
   };
 
   onDragEnd = result => {
@@ -381,8 +354,8 @@ class CourseCurriculum extends React.PureComponent {
       sort_order: index,
       published: lesson.published,
       type: lesson.type,
-      uploaded_lesson_video: lesson.uploaded_lesson_video,
-      uploaded_lesson_file: lesson.uploaded_lesson_file,
+      uploaded_lesson_video: lesson.uploaded_lesson_video || null,
+      uploaded_lesson_file: lesson.uploaded_lesson_file || null,
       article: lesson.article,
     };
 
@@ -481,8 +454,75 @@ class CourseCurriculum extends React.PureComponent {
 
   handleSave = _ => {
     const { match: { params } } = this.props;
-    const derivedSections = this.getSectionsForSave();
-    console.log(derivedSections)
+    const sections = this.getSectionsForSave();
+    const data = { sections };
+
+    this.fetchStart();
+
+    this.courseService.createCurriculum(params.id, data)
+      .then(data => {
+        this.props.enqueueSnackbar(data.detail, { variant: 'success' });
+        this.props.onSaveSuccess();
+      })
+      .catch(error => {
+        this.setState({ error });
+        this.props.enqueueSnackbar('The action was not success.', { variant: 'error' });
+      })
+      .then(this.fetchEnd);
+  };
+
+  refresh = _ => {
+    const { match: { params } } = this.props;
+
+    this.courseService.getCurriculum(params.id)
+      .then(data => {
+        const sections = data.sections;
+        const sectionOrder = [];
+        const state = {
+          lessons: {},
+          sections: {},
+          sectionOrder: [],
+        }
+        for (const section of sections) {
+          const lessons = section.lessons;
+
+          state.sections[section.uuid] = {
+            ...section,
+            error: { ...INITIAL_SECTION_ERROR },
+            lessonUUIDs: lessons.map(item => item.uuid),
+            isEditing: false,
+            isCreated: true,
+          };
+          
+          for (const lesson of lessons) {
+            state.lessons[lesson.uuid] = {
+              ...lesson,
+              error: { ...INITIAL_LESSON_ERROR },
+              isEditing: false,
+              isCreated: true,
+            };
+          }
+          
+          sectionOrder.push(section.uuid);
+          delete state.sections[section.uuid].lessons;
+        }
+
+        state.sectionOrder = sectionOrder;
+        this.setState(state);
+      })
+      .catch(error => this.setState({ error }))
+      .then(this.fetchEnd);
+  };
+
+  fetchStart = _ => {
+    this.setState({
+      error: INITIAL_ERROR,
+      loading: true
+    });
+  };
+
+  fetchEnd = _ => {
+    this.setState({ loading: false });
   };
 
   clearErrorAndReset = (type, sectionOrLesson) => {
@@ -523,31 +563,28 @@ class CourseCurriculum extends React.PureComponent {
   getSectionsForSave = _ => {
     const { sectionOrder, sections, lessons } = this.state;
 
-    return sectionOrder.map((sectionUUID, index) => {
+    return sectionOrder.map(sectionUUID => {
       const section = sections[sectionUUID];
 
-      if (section.isEditing) {
+      if (!section.isCreated) {
         return null;
       }
 
-      let derivedLessons = section.lessonUUIDs.map((lessonUUID, index) => {
+      let derivedLessons = section.lessonUUIDs.map(lessonUUID => {
         const lesson = lessons[lessonUUID];
 
-        if (lesson.isEditing) {
+        if (!lesson.isCreated) {
           return null;
         }
 
         return {
-          id: lesson.id,
           uuid: lesson.uuid,
-          section_uuid: section.uuid,
           type: lesson.type,
           title: lesson.title,
-          uploaded_lesson_video: lesson.uploadedLessonVideo,
-          uploaded_lesson_file: lesson.uploadedLessonFile,
+          uploaded_lesson_video: lesson.uploaded_lesson_video || null,
+          uploaded_lesson_file: lesson.uploaded_lesson_file || null,
           article: lesson.article,
           published: lesson.published,
-          sort_order: index + 1,
         };
       });
 
@@ -555,12 +592,10 @@ class CourseCurriculum extends React.PureComponent {
       derivedLessons = derivedLessons.filter(lesson => !!lesson);
 
       return {
-        id: section.id,
         uuid: section.uuid,
         title: section.title,
         description: section.description,
         published: section.published,
-        sort_order: index + 1,
         lessons: [...derivedLessons],
       };
     }).filter(
@@ -579,14 +614,30 @@ class CourseCurriculum extends React.PureComponent {
     });
   };
 
+  componentDidMount() {
+    this.refresh();
+  }
+
   render() {
     const { classes } = this.props;
-    const { loading, openModSelectVideo, openModUploadVideo, openModUploadFile, openModSelectFile } = this.state;
+    const { 
+      loading, 
+      openModSelectVideo, 
+      openModUploadVideo, 
+      openModUploadFile, 
+      openModSelectFile,
+      error,
+    } = this.state;
     const derivedSections = this.getDerivedSections();
 
     return (
       <React.Fragment>
         <Paper>
+          {error && (
+            <div className={classes.errorSection}>
+              <JSONPretty data={error} />
+            </div>
+          )}
           <DragDropContext onDragEnd={this.onDragEnd}>
             <Droppable droppableId='SECTION-DROP' type='SECTION'>
               {provided => (
@@ -679,6 +730,14 @@ class CourseCurriculum extends React.PureComponent {
     );
   }
 }
+
+CourseCurriculum.propTypes = {
+  onSaveSuccess: PropTypes.func,
+};
+
+CourseCurriculum.defaultProps = {
+  onSaveSuccess: () => {},
+};
 
 export default compose(
   withStyles(styles, { withTheme: true }),
