@@ -4,10 +4,12 @@ import compose from 'recompose/compose';
 
 import { withStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
+import Typography from '@material-ui/core/Typography';
 import Tab from '@material-ui/core/Tab';
 import CourseService from '../../apis/CourseService';
 import Paper from '@material-ui/core/Paper';
 import EditHeader from '../../components/EditHeader';
+import ConfirmDialog from '../../components/ConfirmDialog';
 import CourseLanding from './CourseLanding';
 import CourseCurriculum from './CourseCurriculum';
 
@@ -24,13 +26,15 @@ const styles = theme => ({
   curriculumTab: {
     // backgroundColor: '#e2e2e2'
   },
+  otherError: {
+    color: theme.palette.error.main,
+  },
 });
 
 
 class CourseEdit extends React.PureComponent {
   courseService = new CourseService();
   initialError = {
-    name: '',
     non_field_errors: '',
     detail: '',
   }
@@ -38,6 +42,7 @@ class CourseEdit extends React.PureComponent {
     name: '',
     loading: false,
     selectedTab: 0,
+    openConfirmDialog: false,
     error: {...this.initialError},
   };
 
@@ -53,19 +58,23 @@ class CourseEdit extends React.PureComponent {
     this.setState({error: newError});
   };
 
-  handleChange = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value
-    })
+  showConfirmDialog = () => {
+    this.setState({ openConfirmDialog: true });
   };
 
-  handleSave = _ => {
-    const { enqueueSnackbar } = this.props;
-    const { name } = this.state;
-    const data = { name };
+  handleClose = () => {
+    this.setState({ openConfirmDialog: false });
+  };
+  
+  handleCancel = () => {
+    this.setState({ openConfirmDialog: false });
+  };
+  
+  handleOk = () => {
+    const { enqueueSnackbar, match: { params } } = this.props;
 
-    this.setState({error: {...this.initialError}, loading: true});
-    this.courseService.createCategory(data)
+    this.setState({error: {...this.initialError}, loading: true, openConfirmDialog: false});
+    this.courseService.deleteCourse(params.id)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         this.handleBack();
@@ -73,6 +82,10 @@ class CourseEdit extends React.PureComponent {
       .catch(this.catchError)
       .then(_ => this.setState({ loading: false }));
   };
+
+  handleDelete = () => {
+    this.showConfirmDialog();
+  }
 
   handleBack = _ => {
     this.props.history.goBack();
@@ -86,8 +99,7 @@ class CourseEdit extends React.PureComponent {
     const { classes } = this.props;
     const {
       error,
-      name,
-      loading,
+      openConfirmDialog,
       selectedTab,
     } = this.state;
 
@@ -96,9 +108,30 @@ class CourseEdit extends React.PureComponent {
         <EditHeader 
           text='Edit Course' 
           onBack={this.handleBack} 
-          onDelete={this.handleDelete} 
+          onDelete={this.handleDelete}
         />
         
+        {error.non_field_errors && (
+          <Typography variant='body1' className={classes.otherError}>
+            {error.non_field_errors}
+          </Typography>
+        )}
+
+        {error.detail && (
+          <Typography variant='body1' className={classes.otherError}>
+            {error.detail}
+          </Typography>
+        )}
+
+        <ConfirmDialog 
+          open={openConfirmDialog}
+          title={'Are you sure to delete ?'}
+          description={'All sections and lessons will be deleted.'}
+          onClose={this.handleClose}
+          onCancel={this.handleCancel}
+          onOk={this.handleOk}
+        />
+
         <br />
 
         <Paper square>

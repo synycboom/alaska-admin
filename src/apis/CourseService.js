@@ -21,7 +21,7 @@ class CourseService extends BaseService {
       .catch(this.handleError);
   };
 
-  deleteCourseLanding = (id) => {
+  deleteCourse = (id) => {
     return this.client.delete(`/admin-api/v1.0/courses/${id}/`)
       .then(res => res.data)
       .catch(this.handleError);

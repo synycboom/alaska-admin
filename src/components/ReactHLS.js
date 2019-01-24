@@ -59,6 +59,7 @@ class ReactHls extends React.PureComponent {
 
     return (
       <video
+        crossOrigin='anonymous'
         ref={player => (this.player = player)}
         controls={controls}
         width={width}

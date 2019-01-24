@@ -11,7 +11,6 @@ class UploadedVideoList extends React.PureComponent {
     super(props);
     this.uploadedVideoService = new UploadedVideoService();
     this.columns = [
-      { name: 'file', title: 'File' },
       { name: 'name', title: 'Name' },
       { name: 'owner_full_name', title: 'Owner' },
       { name: 'hash_tags', title: 'Tags' },
