@@ -243,7 +243,7 @@ class CourseLanding extends React.PureComponent {
     this.uploadedVideoService.getUploadedVideo(id)
       .then(data => this.setState({
         uploadedTrailerVideoId: id,
-        openModSelectVideo: false,
+        openModUploadVideo: false,
         uploadedTrailerVideoName: data.name,
         uploadedTrailerVideoPreview: (
           data.encoded_videos.length > 0

@@ -173,7 +173,7 @@ class SelectInput extends React.Component {
   handleChange = (value) => {
     if (value instanceof Array) {
       value = value.map(item => item.value);
-    } else {
+    } else if (value && typeof value === 'object'){
       value = value.value;
     }
     
