@@ -318,20 +318,22 @@ class UploadedVideoEdit extends React.PureComponent {
           <h3>Videos</h3>
           {encodedVideos.map((video, index) => (
             <div key={index}>
-              <p>width: {video.width}px</p>
-              <p>height: {video.height}px</p>
-              <p>duration: {video.duration} seconds</p>
-
               {video.progress === 100 ? (
-                <ReactHLS
-                  url={video.url}
-                />
+                <div>
+                  <p>width: {video.width}px</p>
+                  <p>height: {video.height}px</p>
+                  <p>duration: {video.duration} seconds</p>
+                  <ReactHLS url={video.url} />
+                </div>
               ) : (
-                <LinearProgress
-                  color='secondary'
-                  variant='determinate'
-                  value={video.progress}
-                />
+                <div>
+                  {`${video.progress} %`}
+                  <LinearProgress
+                    color='secondary'
+                    variant='determinate'
+                    value={video.progress}
+                  />
+                </div>
               )}
 
               <Divider style={{marginTop: 20}}/>

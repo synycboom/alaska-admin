@@ -9,6 +9,7 @@ import Typography from '@material-ui/core/Typography';
 import FormControl from '@material-ui/core/FormControl';
 import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
+import TextField from '@material-ui/core/TextField';
 import FormHelperText from '@material-ui/core/FormHelperText';
 
 import UploadedVideoService from '../../apis/UploadedVideoService';
@@ -71,13 +72,13 @@ class UploadedVideoCreate extends React.PureComponent {
     error: {...this.initialError},
   };
 
-  onDrop = ([file]) => {
-    if (file) {
-      this.setState({ file });
-    } else {
-      this.setState({ file: null });
-    }
-  }
+  // onDrop = ([file]) => {
+  //   if (file) {
+  //     this.setState({ file });
+  //   } else {
+  //     this.setState({ file: null });
+  //   }
+  // }
 
   onCoverDrop = ([file]) => {
     if (file) {
@@ -277,7 +278,23 @@ class UploadedVideoCreate extends React.PureComponent {
             )}
           </div>
           
-          <div>
+          <TextField
+            fullWidth
+            required
+            label='S3 File Path'
+            name='file'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={file}
+            onChange={this.handleChange}
+            error={!!error.file}
+            helperText={error.file}
+          />
+          
+          {/* <div>
             <Dropzone
               accept='video/*'
               maxFiles={1}
@@ -304,7 +321,7 @@ class UploadedVideoCreate extends React.PureComponent {
                 {error.file}
               </Typography>
             )}
-          </div>
+          </div> */}
         </React.Fragment>
       </Create>
     );
