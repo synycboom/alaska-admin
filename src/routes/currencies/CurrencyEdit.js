@@ -4,10 +4,7 @@ import compose from 'recompose/compose';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import TextField from '@material-ui/core/TextField';
 import CurrencyService from '../../apis/CurrencyService';
 import Edit from '../../components/Edit';
 
@@ -169,65 +166,69 @@ class CurrencyEdit extends React.PureComponent {
             </Typography>
           )}
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='code'>Code</InputLabel>
-            <Input 
-              id='code' 
-              name='code' 
-              value={code}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.code}
-            />
-            {error.code && (
-              <FormHelperText error>{error.code}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            required
+            label='Code'
+            name='code'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={code}
+            onChange={this.handleChange}
+            error={!!error.code}
+            helperText={error.code}
+          />
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='name'>Name</InputLabel>
-            <Input 
-              id='name' 
-              name='name' 
-              value={name}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.name}
-            />
-            {error.name && (
-              <FormHelperText error>{error.name}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            required
+            label='Name'
+            name='name'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={name}
+            onChange={this.handleChange}
+            error={!!error.name}
+            helperText={error.name}
+          />
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='symbol'>Symbol</InputLabel>
-            <Input 
-              id='symbol' 
-              name='symbol' 
-              value={symbol}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.symbol}
-            />
-            {error.symbol && (
-              <FormHelperText error>{error.symbol}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            required
+            label='Symbol'
+            name='symbol'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={symbol}
+            onChange={this.handleChange}
+            error={!!error.symbol}
+            helperText={error.symbol}
+          />
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='symbolNative'>Symbol Native</InputLabel>
-            <Input 
-              id='symbolNative' 
-              name='symbolNative' 
-              value={symbolNative}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.symbol_native}
-            />
-            {error.symbol_native && (
-              <FormHelperText error>{error.symbol_native}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            required
+            label='Symbol Native'
+            name='symbolNative'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={symbolNative}
+            onChange={this.handleChange}
+            error={!!error.symbol_native}
+            helperText={error.symbol_native}
+          />
 
         </React.Fragment>
       </Edit>

@@ -27,7 +27,6 @@ import UploadedVideoService from '../../apis/UploadedVideoService';
 
 import SelectInput from '../../components/SelectInput';
 import LoadingButton from '../../components/LoadingButton';
-import ReactHLS from '../../components/ReactHLS';
 import TextEditor from '../../components/TextEditor';
 import ModSelectImage from '../uploaded-images/ModSelectImage';
 import ModUploadImage from '../uploaded-images/ModUploadImage';
@@ -44,6 +43,12 @@ const styles = theme => ({
   },
   button: {
     margin: theme.spacing.unit,
+  },
+  iframeContainer: {
+    background: 'black',
+    '& iframe': {
+      width: '100%',
+    },
   },
   rightIcon: {
     marginLeft: theme.spacing.unit,
@@ -212,11 +217,7 @@ class CourseLanding extends React.PureComponent {
         uploadedTrailerVideoId: id,
         openModSelectVideo: false,
         uploadedTrailerVideoName: data.name,
-        uploadedTrailerVideoPreview: (
-          data.encoded_videos.length > 0
-          ? data.encoded_videos[0].url
-          : null
-        ),
+        uploadedTrailerVideoPreview: data.embedded_video,
       }))
       .catch(this.catchGeneralError);
   };
@@ -245,11 +246,7 @@ class CourseLanding extends React.PureComponent {
         uploadedTrailerVideoId: id,
         openModUploadVideo: false,
         uploadedTrailerVideoName: data.name,
-        uploadedTrailerVideoPreview: (
-          data.encoded_videos.length > 0
-          ? data.encoded_videos[0].url
-          : null
-        ),
+        uploadedTrailerVideoPreview: data.embedded_video,
       }))
       .catch(this.catchGeneralError);
   };
@@ -634,8 +631,9 @@ class CourseLanding extends React.PureComponent {
 
           <Grid item xs={12} sm={6}>
             {uploadedTrailerVideoPreview ? (
-              <ReactHLS
-                url={uploadedTrailerVideoPreview}
+              <div 
+                className={classes.iframeContainer}
+                dangerouslySetInnerHTML={{__html: uploadedTrailerVideoPreview}}
               />
             ) : (
               <img

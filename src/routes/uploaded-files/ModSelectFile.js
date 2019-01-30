@@ -9,7 +9,7 @@ import UploadedFileService from '../../apis/UploadedFileService';
 
 import { Table } from '@devexpress/dx-react-grid-material-ui';
 
-class ModSelectVideo extends React.PureComponent {
+class ModSelectFile extends React.PureComponent {
   uploadedFileService = new UploadedFileService();
   columns = [
     { name: 'name', title: 'Name' },
@@ -63,15 +63,15 @@ class ModSelectVideo extends React.PureComponent {
   }  
 }
 
-ModSelectVideo.propTypes = {
+ModSelectFile.propTypes = {
   open: PropTypes.bool,
   onClose: PropTypes.func,
   onSelect: PropTypes.func,
 };
 
-ModSelectVideo.defaultProps = {
+ModSelectFile.defaultProps = {
   onClose() {},
   onSelect() {},
 };
 
-export default ModSelectVideo;
+export default ModSelectFile;

@@ -1,24 +1,16 @@
 import React from 'react';
 import { withSnackbar } from 'notistack';
 import compose from 'recompose/compose';
-import Dropzone from 'react-dropzone';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import Divider from '@material-ui/core/Divider';
+import TextField from '@material-ui/core/TextField';
 
 import UploadedVideoService from '../../apis/UploadedVideoService';
 import TagService from '../../apis/TagService';
 
 import Edit from '../../components/Edit';
 import SelectInput from '../../components/SelectInput';
-import ReactHLS from '../../components/ReactHLS';
-import { formatBytes } from '../../utils/file';
 
 
 const styles = theme => ({
@@ -30,14 +22,11 @@ const styles = theme => ({
   otherError: {
     color: theme.palette.error.main,
   },
-  dropzone: {
-    borderWidth: 2,
-    borderColor: '#666',
-    borderStyle: 'dashed',
-    borderRadius: 5,
-    cursor: 'pointer',
-    padding: 10,
-    marginTop: 20,
+  iframeContainer: {
+    background: 'black',
+    '& iframe': {
+      width: '100%',
+    },
   },
   image: {
     marginTop: '10px',
@@ -59,51 +48,22 @@ class UploadedVideoEdit extends React.PureComponent {
   initialError = {
     name: '',
     file: '',
-    cover: '',
+    duration: '',
+    embedded_video: '',
     tags: '',
     non_field_errors: '',
     detail: '',
   }
   state = {
     name: '',
-    cover: null,
-    coverPreview: '',
+    duration: 0,
+    embeddedVideo: '',
     tags: [],
     allTags: [],
     encodedVideos: [],
     loading: false,
     error: {...this.initialError},
   };
-
-  onCoverDrop = ([file]) => {
-    if (file) {
-      this.setState(state => {
-        this.revokeObjectUrl(state.cover);
-        
-        return {
-          cover: Object.assign(file, {
-            preview: URL.createObjectURL(file)
-          })
-        };
-      });
-    } else {
-      this.setState(state => {
-        this.revokeObjectUrl(state.cover);
-        return { cover: null };
-      });
-    }
-  }
-
-  revokeObjectUrl(file) {
-    if (file) {
-      URL.revokeObjectURL(file.preview);
-    }
-  }
-
-  componentWillUnmount() {
-    // Make sure to revoke the data uris to avoid memory leaks
-    this.revokeObjectUrl(this.state.cover);
-  }
 
   componentDidMount() {
     this.loadData();
@@ -132,8 +92,8 @@ class UploadedVideoEdit extends React.PureComponent {
     const promise2 = this.uploadedVideoService.getUploadedVideo(params.id)
       .then(data => this.setState({
         name: data.name,
-        coverPreview: data.cover_preview,
-        encodedVideos: data.encoded_videos,
+        embeddedVideo: data.embedded_video,
+        duration: data.duration,
         tags: data.tags,
       }))
       .catch(this.catchError);
@@ -152,16 +112,14 @@ class UploadedVideoEdit extends React.PureComponent {
 
   handleSave = () => {
     const { enqueueSnackbar, match: { params } } = this.props;
-    const { name, cover, tags } = this.state;
+    const { name, duration, tags, embeddedVideo } = this.state;
     const formData = new FormData();
 
     formData.append('name', name);
+    formData.append('duration', duration);
+    formData.append('embedded_video', embeddedVideo);
     formData.append('tags', tags.map(item => item.value));
     
-    if (cover) {
-      formData.append('cover', cover);
-    }
-
     this.setState({error: {...this.initialError}, loading: true});
     this.uploadedVideoService.updateUploadedVideo(params.id, formData)
       .then(data => {
@@ -221,11 +179,10 @@ class UploadedVideoEdit extends React.PureComponent {
     const {
       error,
       name,
-      cover,
-      coverPreview,
+      duration,
+      embeddedVideo,
       tags,
       allTags,
-      encodedVideos,
       loading,
     } = this.state;
 
@@ -251,94 +208,77 @@ class UploadedVideoEdit extends React.PureComponent {
             </Typography>
           )}
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel shrink htmlFor='name'>Name</InputLabel>
-            <Input
-              id='name'
-              name='name'
-              value={name}
-              autoFocus
-              onChange={this.handleChange}
-              error={!!error.name}
-            />
-            {error.name && (
-              <FormHelperText error>{error.name}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            required
+            label='Name'
+            name='name'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={name}
+            onChange={this.handleChange}
+            error={!!error.name}
+            helperText={error.name}
+          />
 
           <SelectInput
             isMulti
             isCreatable
-            textFieldProps={{label: 'Tags'}}
+            textFieldProps={{
+              label: 'Tags',
+              variant: 'filled',
+              margin: 'normal',
+              error: !!error.tags,
+              helperText: error.tags,
+              InputLabelProps: {
+                shrink: true,
+              },
+            }}
             name='tags'
             value={tags}
             options={allTags}
             onChange={this.handleChange}
           />
 
-          <div>
-            <Dropzone
-              accept='image/*'
-              maxFiles={1}
-              onDrop={this.onCoverDrop}
-            >
-              {({getRootProps, getInputProps}) => (
-                <div {...getRootProps()} className={classes.dropzone}>
-                  <input {...getInputProps()} />
+          <TextField
+            fullWidth
+            required
+            label='Vimeo Embedded Code'
+            name='embeddedVideo'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={embeddedVideo}
+            onChange={this.handleChange}
+            error={!!error.embedded_video}
+            helperText={error.embedded_video}
+          />
+          
+          <TextField
+            fullWidth
+            required
+            label='Duration'
+            name='duration'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={duration}
+            onChange={this.handleChange}
+            error={!!error.duration}
+            helperText={error.duration}
+          />
 
-                  {cover || coverPreview ? (
-                    <img
-                      alt='Video Cover'
-                      className={classes.image}
-                      src={cover ? cover.preview : coverPreview}
-                    />
-                  ) : (
-                    <div>
-                      <p>Drop an <b>image</b> file here, or click to select an <b>image</b> file</p>
-                    </div>
-                  )}
-                  
-                  {cover && (
-                    <h4>{`${cover.name} - ${formatBytes(cover.size)}`}</h4>
-                  )}
-
-                </div>
-              )}
-            </Dropzone>
-
-            {error.cover && (
-              <Typography variant='body1' className={classes.otherError}>
-                {error.cover}
-              </Typography>
-            )}
-          </div>
-
-          <br />
-
-          <h3>Videos</h3>
-          {encodedVideos.map((video, index) => (
-            <div key={index}>
-              {video.progress === 100 ? (
-                <div>
-                  <p>width: {video.width}px</p>
-                  <p>height: {video.height}px</p>
-                  <p>duration: {video.duration} seconds</p>
-                  <ReactHLS url={video.url} />
-                </div>
-              ) : (
-                <div>
-                  {`${video.progress} %`}
-                  <LinearProgress
-                    color='secondary'
-                    variant='determinate'
-                    value={video.progress}
-                  />
-                </div>
-              )}
-
-              <Divider style={{marginTop: 20}}/>
-            </div>
-          ))}
+          <div 
+            className={classes.iframeContainer} 
+            dangerouslySetInnerHTML={{__html: embeddedVideo}} 
+          />
         </React.Fragment>
       </Edit>
     );

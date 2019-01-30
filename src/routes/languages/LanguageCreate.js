@@ -4,10 +4,7 @@ import compose from 'recompose/compose';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import TextField from '@material-ui/core/TextField';
 import LanguageService from '../../apis/LanguageService';
 import Create from '../../components/Create';
 
@@ -116,51 +113,54 @@ class LanguageCreate extends React.PureComponent {
               {error.detail}
             </Typography>
           )}
-
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='code'>Code</InputLabel>
-            <Input 
-              id='code' 
-              name='code' 
-              value={code}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.code}
-            />
-            {error.code && (
-              <FormHelperText error>{error.code}</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='name'>Name</InputLabel>
-            <Input 
-              id='name' 
-              name='name' 
-              value={name}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.name}
-            />
-            {error.name && (
-              <FormHelperText error>{error.name}</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='nativeName'>Native Name</InputLabel>
-            <Input 
-              id='nativeName' 
-              name='nativeName' 
-              value={nativeName}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.native_name}
-            />
-            {error.native_name && (
-              <FormHelperText error>{error.native_name}</FormHelperText>
-            )}
-          </FormControl>
+          
+          <TextField
+            fullWidth
+            required
+            label='Code'
+            name='code'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={code}
+            onChange={this.handleChange}
+            error={!!error.code}
+            helperText={error.code}
+          />
+          
+          <TextField
+            fullWidth
+            required
+            label='Name'
+            name='name'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={name}
+            onChange={this.handleChange}
+            error={!!error.name}
+            helperText={error.name}
+          />
+          
+          <TextField
+            fullWidth
+            required
+            label='Native Name'
+            name='nativeName'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={nativeName}
+            onChange={this.handleChange}
+            error={!!error.native_name}
+            helperText={error.native_name}
+          />
 
         </React.Fragment>
       </Create>

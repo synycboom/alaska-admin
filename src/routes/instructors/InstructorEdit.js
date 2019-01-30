@@ -5,11 +5,8 @@ import compose from 'recompose/compose';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
+import TextField from '@material-ui/core/TextField';
 import Avatar from '@material-ui/core/Avatar';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import UserService from '../../apis/UserService';
 import Edit from '../../components/Edit';
 
@@ -250,64 +247,68 @@ class InstructorEdit extends React.PureComponent {
             </Typography>
           )}
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='email'>Email Address</InputLabel>
-            <Input 
-              id='email' 
-              name='email' 
-              autoComplete='email' 
-              value={email}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.email}
-            />
-            {error.email && (
-              <FormHelperText error>{error.email}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            required
+            label='Email Address'
+            name='email'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={email}
+            onChange={this.handleChange}
+            error={!!error.email}
+            helperText={error.email}
+          />
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='fullName'>Full Name</InputLabel>
-            <Input 
-              id='fullName' 
-              name='fullName'
-              value={fullName}
-              onChange={this.handleChange} 
-              error={!!error.full_name}
-            />
-            {error.full_name && (
-              <FormHelperText error>{error.full_name}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            required
+            label='Full Name'
+            name='fullName'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={fullName}
+            onChange={this.handleChange}
+            error={!!error.full_name}
+            helperText={error.full_name}
+          />
 
-          <FormControl margin='normal' fullWidth>
-            <InputLabel htmlFor='displayName'>Display Name</InputLabel>
-            <Input 
-              id='displayName' 
-              name='displayName'
-              value={displayName}
-              onChange={this.handleChange} 
-              error={!!error.display_name}
-            />
-            {error.display_name && (
-              <FormHelperText error>{error.display_name}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            label='Display Name'
+            name='displayName'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={displayName}
+            onChange={this.handleChange}
+            error={!!error.display_name}
+            helperText={error.display_name}
+          />
 
-          <FormControl margin='normal' fullWidth>
-            <InputLabel htmlFor='bio'>Bio</InputLabel>
-            <Input 
-              id='bio' 
-              name='bio'
-              value={bio}
-              onChange={this.handleChange}
-              error={!!error.bio}
-              multiline
-            />
-            {error.bio && (
-              <FormHelperText error>{error.bio}</FormHelperText>
-            )}
-          </FormControl>
+          <TextField
+            fullWidth
+            label='Bio'
+            name='bio'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            multiline
+            value={bio}
+            onChange={this.handleChange}
+            error={!!error.bio}
+            helperText={error.bio}
+          />
         </React.Fragment>
       </Edit>
     );

@@ -4,12 +4,8 @@ import compose from 'recompose/compose';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import TextField from '@material-ui/core/TextField';
+import SelectInput from '../../components/SelectInput';
 import SubCategoryService from '../../apis/SubCategoryService';
 import CategoryService from '../../apis/CategoryService';
 import Edit from '../../components/Edit';
@@ -62,7 +58,7 @@ class SubCategoryEdit extends React.PureComponent {
 
     const promise1 = this.categoryService.listAllCategories()
       .then(data => {
-        this.setState({parentCategories: data.results});
+        this.setState({parentCategories: data.results.map(item => ({ value: item.id, label: item.name }))});
       })
       .catch(error => {
         let newError = {};
@@ -194,44 +190,38 @@ class SubCategoryEdit extends React.PureComponent {
             </Typography>
           )}
           
-          <FormControl required fullWidth>
-            <InputLabel htmlFor='parent'>Parent Category</InputLabel>
-            <Select
-              value={parent}
-              onChange={this.handleChange}
-              inputProps={{ name: 'parent', id: 'parent' }}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-
-              {parentCategories.map(item => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.name}
-                </MenuItem>
-              ))}
-
-            </Select>
-
-            {error.parent && (
-              <FormHelperText error>{error.parent}</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='name'>Name</InputLabel>
-            <Input 
-              id='name' 
-              name='name' 
-              value={name}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.name}
-            />
-            {error.name && (
-              <FormHelperText error>{error.name}</FormHelperText>
-            )}
-          </FormControl>
+          <SelectInput
+            textFieldProps={{
+              label: 'Parent Category',
+              variant: 'filled',
+              margin: 'normal',
+              error: !!error.parent,
+              helperText: error.parent,
+              InputLabelProps: {
+                shrink: true,
+              },
+            }}
+            name='parent'
+            value={parent}
+            options={parentCategories}
+            onChange={this.handleChange}
+          />
+          
+          <TextField
+            fullWidth
+            required
+            label='Name'
+            name='name'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={name}
+            onChange={this.handleChange}
+            error={!!error.name}
+            helperText={error.name}
+          />
 
         </React.Fragment>
       </Edit>

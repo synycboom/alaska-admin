@@ -4,12 +4,8 @@ import compose from 'recompose/compose';
 
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
-import FormControl from '@material-ui/core/FormControl';
-import Input from '@material-ui/core/Input';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import TextField from '@material-ui/core/TextField';
+import SelectInput from '../../components/SelectInput';
 import SubscriptionPlanService from '../../apis/SubscriptionPlanService';
 import CurrencyService from '../../apis/CurrencyService';
 import Create from '../../components/Create';
@@ -60,7 +56,7 @@ class SubscriptionPlanCreate extends React.PureComponent {
     this.setState({loading: true});
     this.currencyService.listAllCurrencies()
       .then(data => {
-        this.setState({currencies: data.results});
+        this.setState({currencies: data.results.map(item => ({ value: item.id, label: item.name }))});
       })
       .catch(error => {
         let newError = {};
@@ -147,77 +143,77 @@ class SubscriptionPlanCreate extends React.PureComponent {
               {error.detail}
             </Typography>
           )}
-
-          <FormControl margin='normal' fullWidth>
-            <InputLabel htmlFor='name'>Name</InputLabel>
-            <Input 
-              id='name' 
-              name='name' 
-              value={name}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.name}
-            />
-            {error.name && (
-              <FormHelperText error>{error.name}</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='days'>Day (s)</InputLabel>
-            <Input 
-              id='days' 
-              name='days' 
-              value={days}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.days}
-              inputComponent={NumberFormattedInput}
-            />
-            {error.days && (
-              <FormHelperText error>{error.days}</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel htmlFor='price'>Price</InputLabel>
-            <Input 
-              id='price' 
-              name='price' 
-              value={price}
-              autoFocus
-              onChange={this.handleChange} 
-              error={!!error.price}
-              inputComponent={NumberFormattedInput}
-            />
-            {error.price && (
-              <FormHelperText error>{error.price}</FormHelperText>
-            )}
-          </FormControl>
-
-          <FormControl required fullWidth>
-            <InputLabel htmlFor='currency'>Currency</InputLabel>
-            <Select
-              value={currency}
-              onChange={this.handleChange}
-              inputProps={{ name: 'currency', id: 'currency' }}
-            >
-              <MenuItem value=''>
-                <em>None</em>
-              </MenuItem>
-
-              {currencies.map(item => (
-                <MenuItem key={item.id} value={item.id}>
-                  {item.name}
-                </MenuItem>
-              ))}
-
-            </Select>
-
-            {error.currency && (
-              <FormHelperText error>{error.currency}</FormHelperText>
-            )}
-          </FormControl>
+          
+          <TextField
+            fullWidth
+            required
+            label='Name'
+            name='name'
+            margin='normal'
+            variant='filled'
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={name}
+            onChange={this.handleChange}
+            error={!!error.name}
+            helperText={error.name}
+          />
+          
+          <TextField
+            fullWidth
+            required
+            label='Day (s)'
+            name='days'
+            margin='normal'
+            variant='filled'
+            InputProps={{
+              inputComponent: NumberFormattedInput,
+            }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={days}
+            onChange={this.handleChange}
+            error={!!error.days}
+            helperText={error.days}
+          />
+          
+          <TextField
+            fullWidth
+            required
+            label='Price'
+            name='price'
+            margin='normal'
+            variant='filled'
+            InputProps={{
+              inputComponent: NumberFormattedInput,
+            }}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            value={price}
+            onChange={this.handleChange}
+            error={!!error.price}
+            helperText={error.price}
+          />
+          
+          <SelectInput
+            textFieldProps={{
+              label: 'Currency',
+              variant: 'filled',
+              margin: 'normal',
+              error: !!error.currency,
+              helperText: error.currency,
+              InputLabelProps: {
+                shrink: true,
+              },
+            }}
+            name='currency'
+            value={currency}
+            options={currencies}
+            onChange={this.handleChange}
+          />
 
         </React.Fragment>
       </Create>
