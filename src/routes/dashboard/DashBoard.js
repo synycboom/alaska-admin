@@ -1,12 +1,10 @@
 import React from 'react';
-import Typography from '@material-ui/core/Typography';
+import CardOrder from './CardOrder';
 
 class DashBoard extends React.PureComponent {
   render() {
     return (
-      <Typography>
-        This is a dashboard.
-      </Typography>
+      <CardOrder />
     );
   }
 }

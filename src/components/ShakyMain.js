@@ -4,7 +4,7 @@ import classNames from 'classnames';
 import { drawerWidth } from '../configs/conf';
 import { withRouter, Route } from 'react-router-dom';
 
-import DashBoard from '../routes/DashBoard';
+import DashBoard from '../routes/dashboard/DashBoard';
 import MainInstructor from '../routes/instructors/MainInstructor';
 import MainSubscriptionPlan from '../routes/subscription-plans/MainSubscriptionPlan';
 import MainCurrency from '../routes/currencies/MainCurrency';

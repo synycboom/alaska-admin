@@ -452,6 +452,13 @@ class CourseCurriculum extends React.PureComponent {
       }));
   };
 
+  catchGeneralError = _ => {
+    this.props.enqueueSnackbar(
+      'Something has gone wrong, please refresh.',
+      { variant: 'error' }
+    );
+  };
+  
   handleSave = _ => {
     const { match: { params } } = this.props;
     const sections = this.getSectionsForSave();

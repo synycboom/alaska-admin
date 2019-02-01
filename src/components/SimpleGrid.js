@@ -38,7 +38,7 @@ class SimpleGrid extends React.PureComponent {
       totalCount: 0,
       pageSize: 10,
       currentPage: 0,
-      loading: true,
+      loading: false,
     };
   }
 
@@ -47,17 +47,19 @@ class SimpleGrid extends React.PureComponent {
   }
 
   changeCurrentPage = currentPage => {
-    this.setState({
-      loading: true,
-      currentPage,
-    }, 
-      this.loadData
-    );
+    this.setState({ currentPage, }, this.loadData );
   };
 
   loadData = () => {
     const { pageSize, currentPage } = this.state;
-    const { fetchDataList, enqueueSnackbar } = this.props;
+    const { manual, onManuallyFetch, fetchDataList, enqueueSnackbar } = this.props;
+
+    if (manual) {
+      onManuallyFetch(currentPage, pageSize);
+      return
+    }
+    
+    this.setState({ loading: true });
 
     fetchDataList(currentPage + 1, pageSize)
       .then(data => this.setState({
@@ -76,21 +78,34 @@ class SimpleGrid extends React.PureComponent {
   };
 
   render() {
-    const {
-      rows, 
-      pageSize, 
-      currentPage, 
-      totalCount,
-      loading,
-    } = this.state;
-
     const { 
       classes,
       renderCell,
       columns,
       gridChildren,
       tableColumnExtensions,
+      manual,
     } = this.props;
+
+    let rows = null;
+    let totalCount = null;
+    let loading = null;
+    let pageSize = null;
+    let currentPage = null;
+
+    if (manual) {
+      rows = this.props.rows;
+      totalCount = this.props.totalCount;
+      loading = this.props.loading;
+      pageSize = this.props.pageSize;
+      currentPage = this.props.currentPage;
+    } else {
+      rows = this.state.rows;
+      totalCount = this.state.totalCount;
+      loading = this.state.loading;
+      pageSize = this.state.pageSize;
+      currentPage = this.state.currentPage;
+    }
 
     return (
       <div className={classes.container}>
@@ -127,6 +142,24 @@ SimpleGrid.propTypes = {
   columns: PropTypes.array,
   tableColumnExtensions: PropTypes.array,
   gridChildren: PropTypes.element,
+
+  manual: PropTypes.bool,
+  onManuallyFetch: PropTypes.func,
+  rows: PropTypes.array,
+  totalCount: PropTypes.number,
+  loading: PropTypes.bool,
+  pageSize: PropTypes.number,
+  currentPage: PropTypes.number,
+}
+
+SimpleGrid.defaultProps = {
+  rows: [],
+  totalCount: 0,
+  manual: false,
+  loading: false,
+  pageSize: 10,
+  currentPage: 0,
+  onManuallyFetch() {},
 }
 
 export default compose(

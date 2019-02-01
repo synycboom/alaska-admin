@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@date-io/moment": "^1.0.2",
     "@devexpress/dx-react-core": "^1.10.0",
     "@devexpress/dx-react-grid": "^1.10.0",
     "@devexpress/dx-react-grid-material-ui": "^1.10.0",
@@ -11,6 +12,8 @@
     "axios": "^0.18.0",
     "draft-js": "^0.10.5",
     "hls.js": "^0.12.2",
+    "material-ui-pickers": "^2.1.2",
+    "moment": "^2.24.0",
     "notistack": "^0.4.1",
     "react": "^16.7.0",
     "react-beautiful-dnd": "^10.0.3",
