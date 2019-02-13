@@ -1,10 +1,14 @@
 import React from 'react';
 import CardOrder from './CardOrder';
+import CardSubscription from './CardSubscription';
 
 class DashBoard extends React.PureComponent {
   render() {
     return (
-      <CardOrder />
+      <React.Fragment>
+        <CardOrder />
+        <CardSubscription />
+      </React.Fragment>
     );
   }
 }

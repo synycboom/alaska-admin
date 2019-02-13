@@ -30,6 +30,7 @@ class ModOrderDetail extends React.PureComponent {
   state = { ...this.initialState };
 
   handleCreateSubscription = _ => {
+    this.setState({ loading: true });
     this.orderService
       .createSubscription(this.props.orderId)
       .then(data => {
