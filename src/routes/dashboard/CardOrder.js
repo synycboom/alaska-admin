@@ -14,17 +14,18 @@ import { Table } from '@devexpress/dx-react-grid-material-ui';
 import OrderService from '../../apis/OrderService';
 import DatePicker from '../../components/DatePicker';
 import SimpleGrid from '../../components/SimpleGrid';
+import ModOrderDetail from './ModOrderDetail';
 
 const styles = theme => ({
   paper: {
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
-    paddingBottom: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2
   },
   container: {
     display: 'flex',
     flexWrap: 'wrap',
-    justifyContent: 'space-evenly',
+    justifyContent: 'space-evenly'
   }
 });
 
@@ -35,14 +36,20 @@ class CardOrder extends React.PureComponent {
     { name: 'user_full_name', title: 'FULL NAME' },
     { name: 'course_name', title: 'COURSE NAME' },
     { name: 'subscription_plan_name', title: 'SUBSCRIPTION' },
-    { name: 'payment.status', title: 'PAYMENT STATUS', getCellValue: row => row.payment.status},
-    { name: 'payment.type', title: 'PAYMENT TYPE', getCellValue: row => row.payment.type},
+    {
+      name: 'payment.status',
+      title: 'PAYMENT STATUS',
+      getCellValue: row => row.payment.status
+    },
+    {
+      name: 'payment.type',
+      title: 'PAYMENT TYPE',
+      getCellValue: row => row.payment.type
+    },
     { name: 'created_at', title: 'DATE' },
-    { name: '__select__', title: ' ' },
+    { name: '__select__', title: ' ' }
   ];
-  tableColumnExtensions = [
-    { columnName: '__select__', width: 70 }
-  ]
+  tableColumnExtensions = [{ columnName: '__select__', width: 70 }];
   state = {
     orderNo: '',
     userFullName: '',
@@ -56,17 +63,24 @@ class CardOrder extends React.PureComponent {
     loading: false,
     pageSize: 10,
     currentPage: 0,
+    selectedOrderId: null,
+    openModDetail: false
   };
   filters = {};
 
   handleChange = (event, checked) => {
     this.setState({
-      [event.target.name]: typeof checked === 'undefined' ? event.target.value : checked
+      [event.target.name]:
+        typeof checked === 'undefined' ? event.target.value : checked
     });
   };
 
-  handleViewClick = (id) => {
+  handleViewClick = id => {
+    this.setState({ openModDetail: true, selectedOrderId: id });
+  };
 
+  handleModDetailClose = _ => {
+    this.setState({ openModDetail: false, selectedOrderId: null });
   };
 
   handleSearchClick = _ => {
@@ -77,7 +91,7 @@ class CardOrder extends React.PureComponent {
       to_date: this.state.toDate,
       course_name: this.state.courseName,
       subscription_plan_name: this.state.subscriptionPlanName,
-      is_pending: this.state.isPending ? true : null,
+      is_pending: this.state.isPending ? true : null
     };
 
     this.handleFetchData(0, this.state.pageSize);
@@ -86,30 +100,33 @@ class CardOrder extends React.PureComponent {
   handleFetchData = (currentPage, pageSize) => {
     this.setState({ loading: true, pageSize, currentPage });
 
-    this.orderService.listOrders(currentPage + 1, pageSize, this.filters)
-      .then(data => this.setState({
-        rows: data.results,
-        totalCount: data.count,
-      }))
-      .catch((error) => {
+    this.orderService
+      .listOrders(currentPage + 1, pageSize, this.filters)
+      .then(data =>
+        this.setState({
+          rows: data.results,
+          totalCount: data.count
+        })
+      )
+      .catch(error => {
         if (error.__meta__.status === 404) {
           this.setState({ currentPage: 0 });
         } else {
-          this.props.enqueueSnackbar(error.detail, { variant: 'error' })
+          this.props.enqueueSnackbar(error.detail, { variant: 'error' });
         }
       })
       .then(_ => {
         this.setState({ loading: false });
-      })
+      });
   };
 
-  renderCell = (props) => {
+  renderCell = props => {
     const { column, row } = props;
 
     if (column.name === '__select__') {
       return (
         <Table.Cell>
-          <Button color='primary' onClick={_ => this.props.handleViewClick(row.id)}>
+          <Button color="primary" onClick={_ => this.handleViewClick(row.id)}>
             VIEW
           </Button>
         </Table.Cell>
@@ -133,6 +150,8 @@ class CardOrder extends React.PureComponent {
       loading,
       pageSize,
       currentPage,
+      selectedOrderId,
+      openModDetail
     } = this.state;
 
     return (
@@ -141,12 +160,12 @@ class CardOrder extends React.PureComponent {
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <TextField
               fullWidth
-              label='Order No.'
-              name='orderNo'
-              margin='normal'
-              variant='filled'
+              label="Order No."
+              name="orderNo"
+              margin="normal"
+              variant="filled"
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               value={orderNo}
               onChange={this.handleChange}
@@ -155,12 +174,12 @@ class CardOrder extends React.PureComponent {
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <TextField
               fullWidth
-              label='Full Name'
-              name='userFullName'
-              margin='normal'
-              variant='filled'
+              label="Full Name"
+              name="userFullName"
+              margin="normal"
+              variant="filled"
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               value={userFullName}
               onChange={this.handleChange}
@@ -169,12 +188,12 @@ class CardOrder extends React.PureComponent {
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <DatePicker
               fullWidth
-              margin='normal'
-              variant='filled'
-              name='fromDate'
-              label='From Date'
+              margin="normal"
+              variant="filled"
+              name="fromDate"
+              label="From Date"
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               value={fromDate}
               onChange={this.handleChange}
@@ -183,12 +202,12 @@ class CardOrder extends React.PureComponent {
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <DatePicker
               fullWidth
-              margin='normal'
-              variant='filled'
-              name='toDate'
-              label='To Date'
+              margin="normal"
+              variant="filled"
+              name="toDate"
+              label="To Date"
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               value={toDate}
               onChange={this.handleChange}
@@ -197,12 +216,12 @@ class CardOrder extends React.PureComponent {
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <TextField
               fullWidth
-              label='Course Name'
-              name='courseName'
-              margin='normal'
-              variant='filled'
+              label="Course Name"
+              name="courseName"
+              margin="normal"
+              variant="filled"
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               value={courseName}
               onChange={this.handleChange}
@@ -211,12 +230,12 @@ class CardOrder extends React.PureComponent {
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <TextField
               fullWidth
-              label='Subscription Plan Name'
-              name='subscriptionPlanName'
-              margin='normal'
-              variant='filled'
+              label="Subscription Plan Name"
+              name="subscriptionPlanName"
+              margin="normal"
+              variant="filled"
               InputLabelProps={{
-                shrink: true,
+                shrink: true
               }}
               value={subscriptionPlanName}
               onChange={this.handleChange}
@@ -224,25 +243,25 @@ class CardOrder extends React.PureComponent {
           </Grid>
         </Grid>
 
-        <Grid justify='space-between' container spacing={24}>
+        <Grid justify="space-between" container spacing={24}>
           <Grid item xs={12} sm={6} md={4} lg={2}>
             <FormControlLabel
-              label='Pending Only'
+              label="Pending Only"
               control={
                 <Switch
                   checked={isPending}
                   onChange={this.handleChange}
-                  name='isPending'
-                  color='primary'
+                  name="isPending"
+                  color="primary"
                 />
               }
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4} lg={2}>
-            <Button 
-              style={{width: '100%'}} 
-              color='primary' 
-              variant='contained'
+            <Button
+              style={{ width: '100%' }}
+              color="primary"
+              variant="contained"
               onClick={this.handleSearchClick}
             >
               Search
@@ -262,6 +281,12 @@ class CardOrder extends React.PureComponent {
           columns={this.columns}
           tableColumnExtensions={this.tableColumnExtensions}
         />
+
+        <ModOrderDetail
+          open={openModDetail}
+          orderId={selectedOrderId}
+          onClose={this.handleModDetailClose}
+        />
       </Paper>
     );
   }
@@ -269,5 +294,5 @@ class CardOrder extends React.PureComponent {
 
 export default compose(
   withStyles(styles, { withTheme: true }),
-  withSnackbar,
+  withSnackbar
 )(CardOrder);
