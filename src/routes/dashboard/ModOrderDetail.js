@@ -16,6 +16,12 @@ class ModOrderDetail extends React.PureComponent {
     orderNo: '',
     subscriptionPlanName: '',
     userFullName: '',
+    phone: '',
+    address: '',
+    provinceName: '',
+    districtName: '',
+    cityName: '',
+    zipCode: '',
     payment: {
       expirationTime: '',
       image: '',
@@ -55,6 +61,12 @@ class ModOrderDetail extends React.PureComponent {
           orderNo: data.order_no,
           subscriptionPlanName: data.subscription_plan_name,
           userFullName: data.user_full_name,
+          phone: data.phone,
+          address: data.address,
+          provinceName: data.province_name,
+          districtName: data.district_name,
+          cityName: data.city_name,
+          zipCode: data.zip_code,
           payment: {
             expirationTime: data.payment.expiration_time,
             image: data.payment.image,
@@ -93,6 +105,12 @@ class ModOrderDetail extends React.PureComponent {
       orderNo,
       subscriptionPlanName,
       userFullName,
+      phone,
+      address,
+      provinceName,
+      districtName,
+      cityName,
+      zipCode,
       payment,
       subscription,
       loading
@@ -104,87 +122,160 @@ class ModOrderDetail extends React.PureComponent {
           <h2>Order Detail</h2>
           <TextField
             fullWidth
-            disabled
             label="User"
             name="name"
             margin="normal"
             variant="filled"
             InputLabelProps={{
+              readOnly: true,
               shrink: true
             }}
             value={userFullName}
           />
           <TextField
             fullWidth
-            disabled
             label="Course Name"
             name="name"
             margin="normal"
             variant="filled"
             InputLabelProps={{
+              readOnly: true,
               shrink: true
             }}
             value={courseName}
           />
           <TextField
             fullWidth
-            disabled
             label="Date"
             name="name"
             margin="normal"
             variant="filled"
             InputLabelProps={{
+              readOnly: true,
               shrink: true
             }}
             value={createdAt}
           />
           <TextField
             fullWidth
-            disabled
             label="Order Number"
             name="name"
             margin="normal"
             variant="filled"
             InputLabelProps={{
+              readOnly: true,
               shrink: true
             }}
             value={orderNo}
           />
           <TextField
             fullWidth
-            disabled
             label="Subscription Plan"
             name="name"
             margin="normal"
             variant="filled"
             InputLabelProps={{
+              readOnly: true,
               shrink: true
             }}
             value={subscriptionPlanName}
+          />
+          <h2>Contact Information</h2>
+          <TextField
+            fullWidth
+            label="Phone"
+            name="name"
+            margin="normal"
+            variant="filled"
+            InputLabelProps={{
+              readOnly: true,
+              shrink: true
+            }}
+            value={phone}
+          />
+          <TextField
+            fullWidth
+            label="Address"
+            name="name"
+            margin="normal"
+            variant="filled"
+            InputLabelProps={{
+              readOnly: true,
+              shrink: true
+            }}
+            value={address}
+          />
+          <TextField
+            fullWidth
+            label="Province"
+            name="name"
+            margin="normal"
+            variant="filled"
+            InputLabelProps={{
+              readOnly: true,
+              shrink: true
+            }}
+            value={provinceName}
+          />
+          <TextField
+            fullWidth
+            label="District"
+            name="name"
+            margin="normal"
+            variant="filled"
+            InputLabelProps={{
+              readOnly: true,
+              shrink: true
+            }}
+            value={districtName}
+          />
+          <TextField
+            fullWidth
+            label="City"
+            name="name"
+            margin="normal"
+            variant="filled"
+            InputLabelProps={{
+              readOnly: true,
+              shrink: true
+            }}
+            value={cityName}
+          />
+          <TextField
+            fullWidth
+            label="Zip Code"
+            name="name"
+            margin="normal"
+            variant="filled"
+            InputLabelProps={{
+              readOnly: true,
+              shrink: true
+            }}
+            value={zipCode}
           />
           <h2>Subscription</h2>
           {subscription ? (
             <React.Fragment>
               <TextField
                 fullWidth
-                disabled
                 label="Start Date"
                 name="name"
                 margin="normal"
                 variant="filled"
                 InputLabelProps={{
+                  readOnly: true,
                   shrink: true
                 }}
                 value={subscription.startDate}
               />
               <TextField
                 fullWidth
-                disabled
                 label="End Date"
                 name="name"
                 margin="normal"
                 variant="filled"
                 InputLabelProps={{
+                  readOnly: true,
                   shrink: true
                 }}
                 value={subscription.endDate}
@@ -196,36 +287,36 @@ class ModOrderDetail extends React.PureComponent {
           <h2>Payment</h2>
           <TextField
             fullWidth
-            disabled
             label="Payment Number"
             name="name"
             margin="normal"
             variant="filled"
             InputLabelProps={{
+              readOnly: true,
               shrink: true
             }}
             value={payment.paymentNo}
           />
           <TextField
             fullWidth
-            disabled
             label="Type"
             name="name"
             margin="normal"
             variant="filled"
             InputLabelProps={{
+              readOnly: true,
               shrink: true
             }}
             value={payment.type}
           />
           <TextField
             fullWidth
-            disabled
             label="Status"
             name="name"
             margin="normal"
             variant="filled"
             InputLabelProps={{
+              readOnly: true,
               shrink: true
             }}
             value={payment.status}
@@ -234,12 +325,12 @@ class ModOrderDetail extends React.PureComponent {
             <React.Fragment>
               <TextField
                 fullWidth
-                disabled
                 label="Omise Charge ID"
                 name="name"
                 margin="normal"
                 variant="filled"
                 InputLabelProps={{
+                  readOnly: true,
                   shrink: true
                 }}
                 value={payment.omiseChargeId}
@@ -249,12 +340,12 @@ class ModOrderDetail extends React.PureComponent {
             <React.Fragment>
               <TextField
                 fullWidth
-                disabled
                 label="Expiration Time"
                 name="name"
                 margin="normal"
                 variant="filled"
                 InputLabelProps={{
+                  readOnly: true,
                   shrink: true
                 }}
                 value={payment.expirationTime}
