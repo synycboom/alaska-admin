@@ -10,7 +10,7 @@ import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 
-import CourseService from '../../apis/CourseService'; 
+import CourseService from '../../apis/CourseService';
 import Section from './Section';
 import LoadingButton from '../../components/LoadingButton';
 import ModSelectVideo from '../uploaded-videos/ModSelectVideo';
@@ -28,16 +28,16 @@ const styles = theme => ({
     paddingBottom: theme.spacing.unit * 3,
     marginTop: '20px',
     width: '100%',
-    height: '100%',
+    height: '100%'
   },
   nonFieldError: {
-    color: theme.palette.error.main,
+    color: theme.palette.error.main
   },
   submit: {
-    marginTop: theme.spacing.unit * 3,
+    marginTop: theme.spacing.unit * 3
   },
   errorSection: {
-    padding: '20px',
+    padding: '20px'
   }
 });
 
@@ -45,7 +45,7 @@ const INITIAL_SECTION_ERROR = {
   title: '',
   description: '',
   non_field_errors: '',
-  detail: '',
+  detail: ''
 };
 
 const INITIAL_LESSON_ERROR = {
@@ -55,8 +55,9 @@ const INITIAL_LESSON_ERROR = {
   uploadedLessonVideo: '',
   uploadedLessonFile: '',
   published: '',
+  allow_preview: '',
   non_field_errors: '',
-  detail: '',
+  detail: ''
 };
 
 const INITIAL_ERROR = null;
@@ -67,10 +68,8 @@ class CourseCurriculum extends React.PureComponent {
   uploadedFileService = new UploadedFileService();
   state = {
     loading: false,
-    lessons: {
-    },
-    sections: {
-    },
+    lessons: {},
+    sections: {},
     sectionOrder: [],
     openModSelectVideo: false,
     openModUploadVideo: false,
@@ -79,7 +78,7 @@ class CourseCurriculum extends React.PureComponent {
     // For using in Modal
     currentSectionUUID: null,
     currentLessonUUID: null,
-    error: INITIAL_ERROR,
+    error: INITIAL_ERROR
   };
 
   onDragEnd = result => {
@@ -102,50 +101,53 @@ class CourseCurriculum extends React.PureComponent {
       const newSectionOrder = Array.from(sectionOrder);
       newSectionOrder.splice(source.index, 1);
       newSectionOrder.splice(destination.index, 0, draggableId);
-  
-      this.setState({ sectionOrder: [...newSectionOrder]});
+
+      this.setState({ sectionOrder: [...newSectionOrder] });
     } else {
       // Move a lesson between the same list
       const start = sections[source.droppableId];
       const finish = sections[destination.droppableId];
-      
+
       if (start === finish) {
         const newLessonUUIDs = Array.from(start.lessonUUIDs);
         newLessonUUIDs.splice(source.index, 1);
         newLessonUUIDs.splice(destination.index, 0, draggableId);
-        
+
         const newSection = {
           ...start,
-          lessonUUIDs: newLessonUUIDs,
+          lessonUUIDs: newLessonUUIDs
         };
-        
-        this.setState({ sections: {
-          ...this.state.sections,
-          [newSection.uuid]: newSection,
-        }});
-        
+
+        this.setState({
+          sections: {
+            ...this.state.sections,
+            [newSection.uuid]: newSection
+          }
+        });
       } else {
         // Move a lesson from one to another list
         const startLessonUUIDs = Array.from(start.lessonUUIDs);
         startLessonUUIDs.splice(source.index, 1);
-        
+
         const newStart = {
           ...start,
           lessonUUIDs: startLessonUUIDs
         };
-        
+
         const finishLessonUUIDs = Array.from(finish.lessonUUIDs);
         finishLessonUUIDs.splice(destination.index, 0, draggableId);
         const newFinish = {
           ...finish,
           lessonUUIDs: finishLessonUUIDs
         };
-        
-        this.setState({ sections: {
-          ...this.state.sections,
-          [newStart.uuid]: newStart,
-          [newFinish.uuid]: newFinish,
-        }});
+
+        this.setState({
+          sections: {
+            ...this.state.sections,
+            [newStart.uuid]: newStart,
+            [newFinish.uuid]: newFinish
+          }
+        });
       }
     }
   };
@@ -164,9 +166,9 @@ class CourseCurriculum extends React.PureComponent {
           lessonUUIDs: [],
           published: false,
           error: {
-           ...INITIAL_SECTION_ERROR 
-          },
-        },
+            ...INITIAL_SECTION_ERROR
+          }
+        }
       },
       sectionOrder: [...this.state.sectionOrder]
     };
@@ -189,13 +191,13 @@ class CourseCurriculum extends React.PureComponent {
         ...this.state.sections,
         [id]: {
           ...section,
-          [name]: value,
+          [name]: value
         }
       }
     });
   };
 
-  handleEditSectionClick = (id) => {
+  handleEditSectionClick = id => {
     const section = this.state.sections[id];
     this.setState({
       sections: {
@@ -205,8 +207,10 @@ class CourseCurriculum extends React.PureComponent {
     });
   };
 
-  handleDeleteSectionClick = (id) => {
-    const sectionOrder = this.state.sectionOrder.filter(sectionId => sectionId !== id);
+  handleDeleteSectionClick = id => {
+    const sectionOrder = this.state.sectionOrder.filter(
+      sectionId => sectionId !== id
+    );
     const sections = { ...this.state.sections };
     // TODO: Check if we need to delete lessons?
     delete sections[id];
@@ -232,12 +236,13 @@ class CourseCurriculum extends React.PureComponent {
       title: section.title,
       sort_order: index,
       description: section.description,
-      published: section.published,
+      published: section.published
     };
 
-    this.courseService.validateSection(data)
+    this.courseService
+      .validateSection(data)
       .then(_ => {
-        this.clearErrorAndReset('sections', section)
+        this.clearErrorAndReset('sections', section);
       })
       .catch(this.catchError('sections', section));
   };
@@ -260,18 +265,19 @@ class CourseCurriculum extends React.PureComponent {
           isEditing: true,
           isCreated: false,
           published: false,
+          allow_preview: false,
           error: {
-           ...INITIAL_LESSON_ERROR 
-          },
-        },
+            ...INITIAL_LESSON_ERROR
+          }
+        }
       },
       sections: {
         ...this.state.sections,
         [section.uuid]: {
           ...section,
           lessonUUIDs: [...section.lessonUUIDs]
-        },
-      },
+        }
+      }
     };
 
     // Insert sectionId to sectionOrder
@@ -286,27 +292,27 @@ class CourseCurriculum extends React.PureComponent {
 
   handleLessonDataChange = (lessonUUID, name, value) => {
     const lesson = this.state.lessons[lessonUUID];
-    
+
     this.setState({
       lessons: {
         ...this.state.lessons,
         [lessonUUID]: {
           ...lesson,
-          [name]: value,
+          [name]: value
         }
       }
     });
   };
 
-  handleLessonCancel = (sectionUUID, lessonUUID)  => {
+  handleLessonCancel = (sectionUUID, lessonUUID) => {
     const lesson = this.state.lessons[lessonUUID];
-    
+
     this.setState({
       lessons: {
         ...this.state.lessons,
         [lessonUUID]: {
           ...lesson,
-          isEditing: false,
+          isEditing: false
         }
       }
     });
@@ -321,7 +327,7 @@ class CourseCurriculum extends React.PureComponent {
         ...section,
         lessonUUIDs: section.lessonUUIDs.filter(id => id !== lessonUUID)
       }
-    }
+    };
     const newLessons = { ...this.state.lessons };
     delete newLessons[sectionUUID];
 
@@ -330,57 +336,57 @@ class CourseCurriculum extends React.PureComponent {
 
   handleEditLesson = (sectionUUID, lessonUUID) => {
     const lesson = this.state.lessons[lessonUUID];
-    
+
     this.setState({
       lessons: {
         ...this.state.lessons,
         [lessonUUID]: {
           ...lesson,
-          isEditing: true,
+          isEditing: true
         }
       }
     });
-
   };
 
   handleLessonSave = (sectionUUID, lessonUUID) => {
     const { enqueueSnackbar } = this.props;
     const lesson = this.state.lessons[lessonUUID];
-    const index = this.state.sections[sectionUUID].lessonUUIDs.indexOf(lesson.uuid) + 1;
+    const index =
+      this.state.sections[sectionUUID].lessonUUIDs.indexOf(lesson.uuid) + 1;
 
     const data = {
       uuid: lesson.uuid,
       title: lesson.title,
       sort_order: index,
       published: lesson.published,
+      allow_preview: lesson.allow_preview,
       type: lesson.type,
       uploaded_lesson_video: lesson.uploaded_lesson_video || null,
       uploaded_lesson_file: lesson.uploaded_lesson_file || null,
-      article: lesson.article,
+      article: lesson.article
     };
 
-    ;
-
-    this.courseService.validateLesson(data)
+    this.courseService
+      .validateLesson(data)
       .then(_ => {
-        this.clearErrorAndReset('lessons', lesson)
+        this.clearErrorAndReset('lessons', lesson);
       })
       .catch(this.catchError('lessons', lesson));
   };
 
-  handleOpenModSelectVideo = (currentLessonUUID) => {
+  handleOpenModSelectVideo = currentLessonUUID => {
     this.setState({ openModSelectVideo: true, currentLessonUUID });
   };
-  
-  handleOpenModUploadVideo = (currentLessonUUID) => {
+
+  handleOpenModUploadVideo = currentLessonUUID => {
     this.setState({ openModUploadVideo: true, currentLessonUUID });
   };
 
-  handleOpenModUploadFile = (currentLessonUUID) => {
+  handleOpenModUploadFile = currentLessonUUID => {
     this.setState({ openModUploadFile: true, currentLessonUUID });
   };
 
-  handleOpenModSelectFile = (currentLessonUUID) => {
+  handleOpenModSelectFile = currentLessonUUID => {
     this.setState({ openModSelectFile: true, currentLessonUUID });
   };
 
@@ -400,96 +406,147 @@ class CourseCurriculum extends React.PureComponent {
     this.setState({ openModUploadFile: false, currentLessonUUID: null });
   };
 
-  handleVideoSelect = (id) => {
-    this.uploadedVideoService.getUploadedVideo(id)
+  handleVideoSelect = id => {
+    this.uploadedVideoService
+      .getUploadedVideo(id)
       .then(data => {
-        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_video_name', data.name);
-        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_video', id);
+        this.handleLessonDataChange(
+          this.state.currentLessonUUID,
+          'uploaded_lesson_video_name',
+          data.name
+        );
+        this.handleLessonDataChange(
+          this.state.currentLessonUUID,
+          'uploaded_lesson_video',
+          id
+        );
       })
       .catch(this.catchGeneralError)
-      .then(_ => this.setState({
-        currentLessonUUID: null,
-        openModSelectVideo: false,
-      }));
+      .then(_ =>
+        this.setState({
+          currentLessonUUID: null,
+          openModSelectVideo: false
+        })
+      );
   };
 
-  handleUploadVideoSuccess = (id) => {
-    this.uploadedVideoService.getUploadedVideo(id)
+  handleUploadVideoSuccess = id => {
+    this.uploadedVideoService
+      .getUploadedVideo(id)
       .then(data => {
-        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_video_name', data.name);
-        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_video', id);
+        this.handleLessonDataChange(
+          this.state.currentLessonUUID,
+          'uploaded_lesson_video_name',
+          data.name
+        );
+        this.handleLessonDataChange(
+          this.state.currentLessonUUID,
+          'uploaded_lesson_video',
+          id
+        );
       })
       .catch(this.catchGeneralError)
-      .then(_ => this.setState({
-        currentLessonUUID: null,
-        openModUploadVideo: false,
-      }));
+      .then(_ =>
+        this.setState({
+          currentLessonUUID: null,
+          openModUploadVideo: false
+        })
+      );
   };
 
-  handleFileSelect = (id) => {
-    this.uploadedFileService.getUploadedFile(id)
+  handleFileSelect = id => {
+    this.uploadedFileService
+      .getUploadedFile(id)
       .then(data => {
-        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file_name', data.name);
-        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file', id);
+        this.handleLessonDataChange(
+          this.state.currentLessonUUID,
+          'uploaded_lesson_file_name',
+          data.name
+        );
+        this.handleLessonDataChange(
+          this.state.currentLessonUUID,
+          'uploaded_lesson_file',
+          id
+        );
       })
       .catch(this.catchGeneralError)
-      .then(_ => this.setState({
-        currentLessonUUID: null,
-        openModSelectFile: false,
-      }));
+      .then(_ =>
+        this.setState({
+          currentLessonUUID: null,
+          openModSelectFile: false
+        })
+      );
   };
 
-  handleUploadFileSuccess = (id) => {
-    this.uploadedFileService.getUploadedFile(id)
+  handleUploadFileSuccess = id => {
+    this.uploadedFileService
+      .getUploadedFile(id)
       .then(data => {
-        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file_name', data.name);
-        this.handleLessonDataChange(this.state.currentLessonUUID, 'uploaded_lesson_file', id);
+        this.handleLessonDataChange(
+          this.state.currentLessonUUID,
+          'uploaded_lesson_file_name',
+          data.name
+        );
+        this.handleLessonDataChange(
+          this.state.currentLessonUUID,
+          'uploaded_lesson_file',
+          id
+        );
       })
       .catch(this.catchGeneralError)
-      .then(_ => this.setState({
-        currentLessonUUID: null,
-        openModUploadFile: false,
-      }));
+      .then(_ =>
+        this.setState({
+          currentLessonUUID: null,
+          openModUploadFile: false
+        })
+      );
   };
 
   catchGeneralError = _ => {
-    this.props.enqueueSnackbar(
-      'Something has gone wrong, please refresh.',
-      { variant: 'error' }
-    );
+    this.props.enqueueSnackbar('Something has gone wrong, please refresh.', {
+      variant: 'error'
+    });
   };
-  
+
   handleSave = _ => {
-    const { match: { params } } = this.props;
+    const {
+      match: { params }
+    } = this.props;
     const sections = this.getSectionsForSave();
     const data = { sections };
 
     this.fetchStart();
 
-    this.courseService.createCurriculum(params.id, data)
+    this.courseService
+      .createCurriculum(params.id, data)
       .then(data => {
         this.props.enqueueSnackbar(data.detail, { variant: 'success' });
         this.props.onSaveSuccess();
       })
       .catch(error => {
         this.setState({ error });
-        this.props.enqueueSnackbar('The action was not success.', { variant: 'error' });
+        this.props.enqueueSnackbar('The action was not success.', {
+          variant: 'error'
+        });
       })
       .then(this.fetchEnd);
   };
 
   refresh = _ => {
-    const { match: { params } } = this.props;
+    const {
+      match: { params }
+    } = this.props;
 
-    this.courseService.getCurriculum(params.id)
+    this.courseService
+      .getCurriculum(params.id)
       .then(data => {
         const sections = data.sections;
         const sectionOrder = [];
         const state = {
           lessons: {},
           sections: {},
-          sectionOrder: [],
-        }
+          sectionOrder: []
+        };
         for (const section of sections) {
           const lessons = section.lessons;
 
@@ -498,18 +555,18 @@ class CourseCurriculum extends React.PureComponent {
             error: { ...INITIAL_SECTION_ERROR },
             lessonUUIDs: lessons.map(item => item.uuid),
             isEditing: false,
-            isCreated: true,
+            isCreated: true
           };
-          
+
           for (const lesson of lessons) {
             state.lessons[lesson.uuid] = {
               ...lesson,
               error: { ...INITIAL_LESSON_ERROR },
               isEditing: false,
-              isCreated: true,
+              isCreated: true
             };
           }
-          
+
           sectionOrder.push(section.uuid);
           delete state.sections[section.uuid].lessons;
         }
@@ -536,13 +593,15 @@ class CourseCurriculum extends React.PureComponent {
     this.setState({
       [type]: {
         ...this.state[type],
-        [sectionOrLesson.uuid]: { 
-          ...sectionOrLesson, 
+        [sectionOrLesson.uuid]: {
+          ...sectionOrLesson,
           isEditing: false,
           isCreated: true,
           error: {
-            ...(type === 'sections' ? INITIAL_SECTION_ERROR : INITIAL_LESSON_ERROR) 
-          },
+            ...(type === 'sections'
+              ? INITIAL_SECTION_ERROR
+              : INITIAL_LESSON_ERROR)
+          }
         }
       }
     });
@@ -564,51 +623,56 @@ class CourseCurriculum extends React.PureComponent {
       }
     });
 
-    this.props.enqueueSnackbar('The action was not success.', { variant: 'error' });
+    this.props.enqueueSnackbar('The action was not success.', {
+      variant: 'error'
+    });
   };
 
   getSectionsForSave = _ => {
     const { sectionOrder, sections, lessons } = this.state;
 
-    return sectionOrder.map(sectionUUID => {
-      const section = sections[sectionUUID];
+    return sectionOrder
+      .map(sectionUUID => {
+        const section = sections[sectionUUID];
 
-      if (!section.isCreated) {
-        return null;
-      }
-
-      let derivedLessons = section.lessonUUIDs.map(lessonUUID => {
-        const lesson = lessons[lessonUUID];
-
-        if (!lesson.isCreated) {
+        if (!section.isCreated) {
           return null;
         }
 
+        let derivedLessons = section.lessonUUIDs.map(lessonUUID => {
+          const lesson = lessons[lessonUUID];
+
+          if (!lesson.isCreated) {
+            return null;
+          }
+
+          return {
+            uuid: lesson.uuid,
+            type: lesson.type,
+            title: lesson.title,
+            uploaded_lesson_video: lesson.uploaded_lesson_video || null,
+            uploaded_lesson_file: lesson.uploaded_lesson_file || null,
+            article: lesson.article,
+            published: lesson.published,
+            allow_preview: lesson.allow_preview
+          };
+        });
+
+        // Filter null lessons out!
+        derivedLessons = derivedLessons.filter(lesson => !!lesson);
+
         return {
-          uuid: lesson.uuid,
-          type: lesson.type,
-          title: lesson.title,
-          uploaded_lesson_video: lesson.uploaded_lesson_video || null,
-          uploaded_lesson_file: lesson.uploaded_lesson_file || null,
-          article: lesson.article,
-          published: lesson.published,
+          uuid: section.uuid,
+          title: section.title,
+          description: section.description,
+          published: section.published,
+          lessons: [...derivedLessons]
         };
-      });
-
-      // Filter null lessons out!
-      derivedLessons = derivedLessons.filter(lesson => !!lesson);
-
-      return {
-        uuid: section.uuid,
-        title: section.title,
-        description: section.description,
-        published: section.published,
-        lessons: [...derivedLessons],
-      };
-    }).filter(
-      // Filter null sections out!
-      section => !!section
-    );
+      })
+      .filter(
+        // Filter null sections out!
+        section => !!section
+      );
   };
 
   getDerivedSections = _ => {
@@ -616,7 +680,9 @@ class CourseCurriculum extends React.PureComponent {
 
     return sectionOrder.map(sectionUUID => {
       const section = sections[sectionUUID];
-      const derivedLessons = section.lessonUUIDs.map(lessonUUID => lessons[lessonUUID]);
+      const derivedLessons = section.lessonUUIDs.map(
+        lessonUUID => lessons[lessonUUID]
+      );
       return { ...section, lessons: [...derivedLessons] };
     });
   };
@@ -627,13 +693,13 @@ class CourseCurriculum extends React.PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { 
-      loading, 
-      openModSelectVideo, 
-      openModUploadVideo, 
-      openModUploadFile, 
+    const {
+      loading,
+      openModSelectVideo,
+      openModUploadVideo,
+      openModUploadFile,
       openModSelectFile,
-      error,
+      error
     } = this.state;
     const derivedSections = this.getDerivedSections();
 
@@ -646,48 +712,51 @@ class CourseCurriculum extends React.PureComponent {
             </div>
           )}
           <DragDropContext onDragEnd={this.onDragEnd}>
-            <Droppable droppableId='SECTION-DROP' type='SECTION'>
+            <Droppable droppableId="SECTION-DROP" type="SECTION">
               {provided => (
                 <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={classes.paper}
                 >
-                  {derivedSections.length ? derivedSections.map((section, index) => (
-                    <Section
-                      key={section.uuid}
-                      draggableId={section.uuid}
-                      index={index}
-                      title={section.title}
-                      isCreated={section.isCreated}
-                      isEditing={section.isEditing}
-                      description={section.description}
-                      published={section.published}
-                      lessons={section.lessons}
-                      error={section.error}
-
-                      // SECTION
-                      onAddNewSection={this.handleAddNewSection}
-                      onEditSectionClick={this.handleEditSectionClick}
-                      onDeleteSectionClick={this.handleDeleteSectionClick}
-                      onSectionDataChange={this.handleSectionChange}
-                      onSaveSection={this.handleSectionSave}
-                      onCancelSection={this.handleSectionCancel}
-                      
-                      // LESSON
-                      onAddLesson={this.handleAddLesson}
-                      onLessonDataChange={this.handleLessonDataChange}
-                      onCancelLesson={this.handleLessonCancel}
-                      onDeleteLesson={this.handleDeleteLesson}
-                      onEditLesson={this.handleEditLesson}
-                      onSaveLesson={this.handleLessonSave}
-                      onOpenModSelectVideo={this.handleOpenModSelectVideo}
-                      onOpenModUploadVideo={this.handleOpenModUploadVideo}
-                      onOpenModUploadFile={this.handleOpenModUploadFile}
-                      onOpenModSelectFile={this.handleOpenModSelectFile}
-                    />
-                  )) : (
-                    <Button variant='outlined' onClick={this.handleAddNewSection}>
+                  {derivedSections.length ? (
+                    derivedSections.map((section, index) => (
+                      <Section
+                        key={section.uuid}
+                        draggableId={section.uuid}
+                        index={index}
+                        title={section.title}
+                        isCreated={section.isCreated}
+                        isEditing={section.isEditing}
+                        description={section.description}
+                        published={section.published}
+                        lessons={section.lessons}
+                        error={section.error}
+                        // SECTION
+                        onAddNewSection={this.handleAddNewSection}
+                        onEditSectionClick={this.handleEditSectionClick}
+                        onDeleteSectionClick={this.handleDeleteSectionClick}
+                        onSectionDataChange={this.handleSectionChange}
+                        onSaveSection={this.handleSectionSave}
+                        onCancelSection={this.handleSectionCancel}
+                        // LESSON
+                        onAddLesson={this.handleAddLesson}
+                        onLessonDataChange={this.handleLessonDataChange}
+                        onCancelLesson={this.handleLessonCancel}
+                        onDeleteLesson={this.handleDeleteLesson}
+                        onEditLesson={this.handleEditLesson}
+                        onSaveLesson={this.handleLessonSave}
+                        onOpenModSelectVideo={this.handleOpenModSelectVideo}
+                        onOpenModUploadVideo={this.handleOpenModUploadVideo}
+                        onOpenModUploadFile={this.handleOpenModUploadFile}
+                        onOpenModSelectFile={this.handleOpenModSelectFile}
+                      />
+                    ))
+                  ) : (
+                    <Button
+                      variant="outlined"
+                      onClick={this.handleAddNewSection}
+                    >
                       New Section
                     </Button>
                   )}
@@ -700,8 +769,8 @@ class CourseCurriculum extends React.PureComponent {
 
         <LoadingButton
           fullWidth
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           loading={loading}
           className={classes.submit}
           onClick={this.handleSave}
@@ -732,22 +801,21 @@ class CourseCurriculum extends React.PureComponent {
           onSaveSuccess={this.handleUploadFileSuccess}
           open={openModUploadFile}
         />
-
       </React.Fragment>
     );
   }
 }
 
 CourseCurriculum.propTypes = {
-  onSaveSuccess: PropTypes.func,
+  onSaveSuccess: PropTypes.func
 };
 
 CourseCurriculum.defaultProps = {
-  onSaveSuccess: () => {},
+  onSaveSuccess: () => {}
 };
 
 export default compose(
   withStyles(styles, { withTheme: true }),
   withSnackbar,
-  withRouter,
+  withRouter
 )(CourseCurriculum);

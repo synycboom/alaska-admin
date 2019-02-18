@@ -28,7 +28,7 @@ import TextEditor from '../../components/TextEditor';
 
 const styles = theme => ({
   nonFieldError: {
-    color: theme.palette.error.main,
+    color: theme.palette.error.main
   },
   container: {
     ...theme.mixins.gutters(),
@@ -37,28 +37,28 @@ const styles = theme => ({
     backgroundColor: 'white',
     border: 'solid 1px grey',
     marginBottom: '10px',
-    position: 'relative',
+    position: 'relative'
   },
   header: {
     display: 'flex',
     marginBottom: '10px',
     alignItems: 'center',
     '&:hover $hoverContainer': {
-      opacity: 1,
-    },
+      opacity: 1
+    }
   },
   hoverContainer: {
     display: 'flex',
     opacity: 0.1,
-    flexGrow: 1,
+    flexGrow: 1
   },
   lessonName: {
-    marginRight: '5px',
+    marginRight: '5px'
   },
   headerIcon: {
     cursor: 'pointer',
     marginLeft: '5px',
-    marginRight: '5px',
+    marginRight: '5px'
   },
   addButtonContainer: {
     position: 'absolute',
@@ -66,52 +66,67 @@ const styles = theme => ({
     left: '-20px',
     zIndex: 1,
     '&:hover $addIcon': {
-      opacity: 1,
-    },
+      opacity: 1
+    }
   },
   addIcon: {
     opacity: 0.5,
     background: 'white',
     border: 'solid 1px #cac1c1',
-    cursor: 'pointer',
+    cursor: 'pointer'
   },
   addForChoosingIcon: {
-    marginRight: theme.spacing.unit,
+    marginRight: theme.spacing.unit
   },
   savePanel: {
     display: 'flex',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-end'
   },
   cancelButton: {
-    marginRight: '5px',
+    marginRight: '5px'
   },
   bottomNavigation: {
     border: '1px solid #e2e2e2'
   },
   bottomNavigationError: {
-    borderColor: theme.palette.error.main,
+    borderColor: theme.palette.error.main
   },
   editingSection: {
     marginTop: '10px',
     display: 'flex',
-    justifyContent: 'center',
-  },
+    justifyContent: 'center'
+  }
 });
 
-const LessonHeader = ({classes, index, title, published, onDeleteClick, onEditClick}) => (
+const LessonHeader = ({
+  classes,
+  index,
+  title,
+  published,
+  onDeleteClick,
+  onEditClick
+}) => (
   <div className={classes.header}>
     {published ? (
-      <CheckCircleOutlineIcon color='primary'/>
+      <CheckCircleOutlineIcon color="primary" />
     ) : (
-      <HighlightOffIcon color='secondary'/>
+      <HighlightOffIcon color="secondary" />
     )}
     <span>&nbsp; Lesson {index}: </span>
     <span className={classes.lessonName}>&nbsp;{title}</span>
     <div className={classes.hoverContainer}>
-      <EditIcon className={classes.headerIcon} fontSize='small' onClick={onEditClick}/>
-      <DeleteForeverIcon className={classes.headerIcon} fontSize='small' onClick={onDeleteClick}/>
-      <div style={{flexGrow: 1}} />
-      <DehazeIcon fontSize='small'/>
+      <EditIcon
+        className={classes.headerIcon}
+        fontSize="small"
+        onClick={onEditClick}
+      />
+      <DeleteForeverIcon
+        className={classes.headerIcon}
+        fontSize="small"
+        onClick={onDeleteClick}
+      />
+      <div style={{ flexGrow: 1 }} />
+      <DehazeIcon fontSize="small" />
     </div>
   </div>
 );
@@ -122,8 +137,8 @@ class Lesson extends React.PureComponent {
     return (
       <div>
         <Button
-          variant='contained'
-          color='secondary'
+          variant="contained"
+          color="secondary"
           className={classes.button}
           onClick={this.handleOpenModSelectVideo}
         >
@@ -131,8 +146,8 @@ class Lesson extends React.PureComponent {
           <FolderOpenIcon className={classes.rightIcon} />
         </Button>
         <Button
-          variant='contained'
-          color='default'
+          variant="contained"
+          color="default"
           className={classes.button}
           onClick={this.handleOpenModUploadVideo}
         >
@@ -145,10 +160,24 @@ class Lesson extends React.PureComponent {
             icon={<VideocamIcon />}
             label={`File: ${uploadedLessonVideoName}`}
             clickable
-            color='primary'
+            color="primary"
             onDelete={this.handleDiscardVideo}
           />
         )}
+
+        <br />
+
+        <FormControlLabel
+          label="Allow Preview!"
+          control={
+            <Switch
+              checked={this.props.allowPreview}
+              onChange={this.handleChange}
+              name="allow_preview"
+              color="primary"
+            />
+          }
+        />
       </div>
     );
   };
@@ -158,8 +187,8 @@ class Lesson extends React.PureComponent {
     return (
       <div>
         <Button
-          variant='contained'
-          color='secondary'
+          variant="contained"
+          color="secondary"
           className={classes.button}
           onClick={this.handleOpenModSelectFile}
         >
@@ -167,8 +196,8 @@ class Lesson extends React.PureComponent {
           <FolderOpenIcon className={classes.rightIcon} />
         </Button>
         <Button
-          variant='contained'
-          color='default'
+          variant="contained"
+          color="default"
           className={classes.button}
           onClick={this.handleOpenModUploadFile}
         >
@@ -181,7 +210,7 @@ class Lesson extends React.PureComponent {
             icon={<FileCopyIcon />}
             label={`File: ${uploadedLessonFileName}`}
             clickable
-            color='primary'
+            color="primary"
             onDelete={this.handleDiscardFile}
           />
         )}
@@ -194,8 +223,8 @@ class Lesson extends React.PureComponent {
 
     return (
       <TextEditor
-        label='Article'
-        name='article'
+        label="Article"
+        name="article"
         value={article}
         onChange={this.handleChange}
       />
@@ -215,26 +244,22 @@ class Lesson extends React.PureComponent {
   };
 
   handleTypeChange = (_, value) => {
-    this.props.onChange(
-      this.props.draggableId,
-      'type',
-      value,
-    );
+    this.props.onChange(this.props.draggableId, 'type', value);
   };
 
   handleDiscardVideo = _ => {
     this.props.onChange(
       this.props.draggableId,
       'uploaded_lesson_video_name',
-      '',
+      ''
     );
-    
+
     // WTF happens here, It won't work if we don't wrap the onChange() in setTimeout?
     setTimeout(_ => {
       this.props.onChange(
         this.props.draggableId,
         'uploaded_lesson_video',
-        null,
+        null
       );
     });
   };
@@ -243,15 +268,11 @@ class Lesson extends React.PureComponent {
     this.props.onChange(
       this.props.draggableId,
       'uploaded_lesson_file_name',
-      '',
+      ''
     );
 
     setTimeout(_ => {
-      this.props.onChange(
-        this.props.draggableId,
-        'uploaded_lesson_file',
-        null,
-      );
+      this.props.onChange(this.props.draggableId, 'uploaded_lesson_file', null);
     });
   };
 
@@ -301,12 +322,12 @@ class Lesson extends React.PureComponent {
       published,
       isEditing,
       isCreated,
-      error,
+      error
     } = this.props;
 
     let EditingComponent = null;
 
-    switch(type) {
+    switch (type) {
       case 'video':
         EditingComponent = this.renderVideoComponent();
         break;
@@ -319,11 +340,7 @@ class Lesson extends React.PureComponent {
     }
 
     return (
-      <Draggable 
-        type='LESSON'
-        index={index}
-        draggableId={draggableId} 
-      >
+      <Draggable type="LESSON" index={index} draggableId={draggableId}>
         {provided => (
           <div
             {...provided.draggableProps}
@@ -334,24 +351,24 @@ class Lesson extends React.PureComponent {
             {isEditing ? (
               <div>
                 {error.non_field_errors && (
-                  <Typography variant='body1' className={classes.nonFieldError}>
+                  <Typography variant="body1" className={classes.nonFieldError}>
                     {error.non_field_errors}
                   </Typography>
                 )}
                 {error.detail && (
-                  <Typography variant='body1' className={classes.nonFieldError}>
+                  <Typography variant="body1" className={classes.nonFieldError}>
                     {error.detail}
                   </Typography>
                 )}
                 <TextField
                   fullWidth
                   required
-                  label='Title'
-                  name='title'
-                  variant='outlined'
-                  margin='normal'
+                  label="Title"
+                  name="title"
+                  variant="outlined"
+                  margin="normal"
                   InputLabelProps={{
-                    shrink: true,
+                    shrink: true
                   }}
                   value={title}
                   onChange={this.handleChange}
@@ -360,32 +377,43 @@ class Lesson extends React.PureComponent {
                 />
 
                 <BottomNavigation
-                  value={type} 
-                  onChange={this.handleTypeChange} 
-                  className={
-                    classNames( classes.bottomNavigation, { [classes.bottomNavigationError]: error.type })
-                  }
+                  value={type}
+                  onChange={this.handleTypeChange}
+                  className={classNames(classes.bottomNavigation, {
+                    [classes.bottomNavigationError]: error.type
+                  })}
                 >
-                  <BottomNavigationAction label='Video' value='video' icon={<VideocamIcon />} />
-                  <BottomNavigationAction label='File' value='file' icon={<FileCopyIcon />} />
-                  <BottomNavigationAction label='Article' value='article' icon={<ReceiptIcon />} />
+                  <BottomNavigationAction
+                    label="Video"
+                    value="video"
+                    icon={<VideocamIcon />}
+                  />
+                  <BottomNavigationAction
+                    label="File"
+                    value="file"
+                    icon={<FileCopyIcon />}
+                  />
+                  <BottomNavigationAction
+                    label="Article"
+                    value="article"
+                    icon={<ReceiptIcon />}
+                  />
                 </BottomNavigation>
-                
 
                 {EditingComponent && (
                   <div className={classes.editingSection}>
                     {EditingComponent}
                   </div>
                 )}
-                
+
                 <FormControlLabel
-                  label='Publish This Section'
+                  label="Publish This Lesson"
                   control={
                     <Switch
                       checked={published}
                       onChange={this.handleChange}
-                      name='published'
-                      color='primary'
+                      name="published"
+                      color="primary"
                     />
                   }
                 />
@@ -393,8 +421,8 @@ class Lesson extends React.PureComponent {
                 <div className={classes.savePanel}>
                   {!isCreated && (
                     <Button
-                      variant='outlined'
-                      color='secondary'
+                      variant="outlined"
+                      color="secondary"
                       className={classes.cancelButton}
                       onClick={this.handleCancel}
                     >
@@ -402,9 +430,9 @@ class Lesson extends React.PureComponent {
                     </Button>
                   )}
 
-                  <Button 
-                    variant='outlined' 
-                    color='primary' 
+                  <Button
+                    variant="outlined"
+                    color="primary"
                     onClick={this.handleSave}
                   >
                     OK
@@ -413,7 +441,7 @@ class Lesson extends React.PureComponent {
               </div>
             ) : (
               <React.Fragment>
-                <LessonHeader 
+                <LessonHeader
                   title={title}
                   classes={classes}
                   index={index + 1}
@@ -422,7 +450,10 @@ class Lesson extends React.PureComponent {
                   onDeleteClick={this.handleDeleteClick}
                 />
                 <div className={classes.addButtonContainer}>
-                  <button className={classes.addIcon} onClick={this.handleAddLesson}>
+                  <button
+                    className={classes.addIcon}
+                    onClick={this.handleAddLesson}
+                  >
                     <AddIcon />
                   </button>
                 </div>
@@ -445,6 +476,7 @@ Lesson.propTypes = {
   type: PropTypes.oneOf(['video', 'article', 'file', null]),
   title: PropTypes.string,
   published: PropTypes.bool,
+  allowPreview: PropTypes.bool,
   article: PropTypes.string,
   uploadedLessonVideoName: PropTypes.string,
   uploadedLessonVideo: PropTypes.number,
@@ -459,9 +491,7 @@ Lesson.propTypes = {
   onOpenModSelectFile: PropTypes.func,
   onChange: PropTypes.func,
   onCancel: PropTypes.func,
-  onSave: PropTypes.func,
+  onSave: PropTypes.func
 };
 
-export default compose(
-  withStyles(styles, { withTheme: true }),
-)(Lesson);
+export default compose(withStyles(styles, { withTheme: true }))(Lesson);
