@@ -16,6 +16,7 @@ import FolderOpenIcon from '@material-ui/icons/FolderOpen';
 import ImageIcon from '@material-ui/icons/Image';
 import VideocamIcon from '@material-ui/icons/Videocam';
 
+import TagService from '../../apis/TagService';
 import LanguageService from '../../apis/LanguageService';
 import LevelService from '../../apis/LevelService';
 import CategoryService from '../../apis/CategoryService';
@@ -35,30 +36,31 @@ import ModUploadVideo from '../uploaded-videos/ModUploadVideo';
 
 const styles = theme => ({
   otherError: {
-    color: theme.palette.error.main,
+    color: theme.palette.error.main
   },
   form: {
     width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing.unit,
+    marginTop: theme.spacing.unit
   },
   button: {
-    margin: theme.spacing.unit,
+    margin: theme.spacing.unit
   },
   iframeContainer: {
     background: 'black',
     '& iframe': {
-      width: '100%',
-    },
+      width: '100%'
+    }
   },
   rightIcon: {
-    marginLeft: theme.spacing.unit,
+    marginLeft: theme.spacing.unit
   },
   submit: {
-    marginTop: theme.spacing.unit * 3,
-  },
+    marginTop: theme.spacing.unit * 3
+  }
 });
 
 class CourseLanding extends React.PureComponent {
+  tagService = new TagService();
   courseService = new CourseService();
   languageService = new LanguageService();
   levelService = new LevelService();
@@ -68,6 +70,7 @@ class CourseLanding extends React.PureComponent {
   uploadedImageService = new UploadedImageService();
   uploadedVideoService = new UploadedVideoService();
   initialError = {
+    tags: '',
     title: '',
     headline: '',
     description: '',
@@ -81,8 +84,8 @@ class CourseLanding extends React.PureComponent {
     instructor: '',
     subscription_plans: '',
     non_field_errors: '',
-    detail: '',
-  }
+    detail: ''
+  };
   state = {
     title: '',
     headline: '',
@@ -106,15 +109,20 @@ class CourseLanding extends React.PureComponent {
     instructors: [],
     subscriptionPlans: [],
     allSubscriptionPlans: [],
-    error: {...this.initialError},
+    tags: [],
+    allTags: [],
+    error: { ...this.initialError },
     openModSelectImage: false,
     openModSelectVideo: false,
     openModUploadImage: false,
-    openModUploadVideo: false,
-  }
+    openModUploadVideo: false
+  };
 
   handleSave = _ => {
-    const { match: { params }, mode } = this.props;
+    const {
+      match: { params },
+      mode
+    } = this.props;
     const data = this.populateSaveData();
     let promise = Promise.resolve();
 
@@ -125,8 +133,9 @@ class CourseLanding extends React.PureComponent {
     } else {
       promise = this.courseService.updateCourseLanding(params.id, data);
     }
-    
-    promise.then(data => {
+
+    promise
+      .then(data => {
         this.props.enqueueSnackbar(data.detail, { variant: 'success' });
         this.props.onSaveSuccess();
       })
@@ -136,22 +145,26 @@ class CourseLanding extends React.PureComponent {
 
   handleChange = (event, checked) => {
     this.setState({
-      [event.target.name]: typeof checked === 'undefined' ? event.target.value : checked
+      [event.target.name]:
+        typeof checked === 'undefined' ? event.target.value : checked
     });
   };
 
-  handleCategoryChange = (event) => {
-    this.handleChange(event)
-    this.categoryService.listSubCategories(event.target.value)
-      .then(data => this.setState({
-        subcategory: null,
-        subcategories: data.results.map(item => ({
-          value: item.id,
-          label: item.name
-        }))
-      }))
+  handleCategoryChange = event => {
+    this.handleChange(event);
+    this.categoryService
+      .listSubCategories(event.target.value)
+      .then(data =>
+        this.setState({
+          subcategory: null,
+          subcategories: data.results.map(item => ({
+            value: item.id,
+            label: item.name
+          }))
+        })
+      )
       .catch(this.catchGeneralError);
-  }
+  };
 
   // ------------------------------------------------------------------ ModSelectImage
   handleImageOpen = () => {
@@ -162,14 +175,17 @@ class CourseLanding extends React.PureComponent {
     this.setState({ openModSelectImage: false });
   };
 
-  handleImageSelect = (id) => {
-    this.uploadedImageService.getUploadedImage(id)
-      .then(data => this.setState({
-        uploadedCoverImageId: id,
-        openModSelectImage: false,
-        uploadedCoverImagePreview: data.original_image,
-        uploadedCoverImageName: data.name,
-      }))
+  handleImageSelect = id => {
+    this.uploadedImageService
+      .getUploadedImage(id)
+      .then(data =>
+        this.setState({
+          uploadedCoverImageId: id,
+          openModSelectImage: false,
+          uploadedCoverImagePreview: data.original_image,
+          uploadedCoverImageName: data.name
+        })
+      )
       .catch(this.catchGeneralError);
   };
 
@@ -178,9 +194,9 @@ class CourseLanding extends React.PureComponent {
       uploadedCoverImageId: null,
       openModSelectImage: false,
       uploadedCoverImagePreview: '',
-      uploadedCoverImageName: '',
+      uploadedCoverImageName: ''
     });
-  }
+  };
 
   // ----------------------------------------------------------------- ModUploadImage
   handleUploadImageOpen = () => {
@@ -191,14 +207,17 @@ class CourseLanding extends React.PureComponent {
     this.setState({ openModUploadImage: false });
   };
 
-  handleUploadImageSuccess = (id) => {
-    this.uploadedImageService.getUploadedImage(id)
-      .then(data => this.setState({
-        uploadedCoverImageId: id,
-        openModUploadImage: false,
-        uploadedCoverImagePreview: data.original_image,
-        uploadedCoverImageName: data.name,
-      }))
+  handleUploadImageSuccess = id => {
+    this.uploadedImageService
+      .getUploadedImage(id)
+      .then(data =>
+        this.setState({
+          uploadedCoverImageId: id,
+          openModUploadImage: false,
+          uploadedCoverImagePreview: data.original_image,
+          uploadedCoverImageName: data.name
+        })
+      )
       .catch(this.catchGeneralError);
   };
 
@@ -211,14 +230,17 @@ class CourseLanding extends React.PureComponent {
     this.setState({ openModSelectVideo: false });
   };
 
-  handleVideoSelect = (id) => {
-    this.uploadedVideoService.getUploadedVideo(id)
-      .then(data => this.setState({
-        uploadedTrailerVideoId: id,
-        openModSelectVideo: false,
-        uploadedTrailerVideoName: data.name,
-        uploadedTrailerVideoPreview: data.embedded_video,
-      }))
+  handleVideoSelect = id => {
+    this.uploadedVideoService
+      .getUploadedVideo(id)
+      .then(data =>
+        this.setState({
+          uploadedTrailerVideoId: id,
+          openModSelectVideo: false,
+          uploadedTrailerVideoName: data.name,
+          uploadedTrailerVideoPreview: data.embedded_video
+        })
+      )
       .catch(this.catchGeneralError);
   };
 
@@ -227,9 +249,9 @@ class CourseLanding extends React.PureComponent {
       uploadedTrailerVideoId: null,
       openModSelectVideo: false,
       uploadedTrailerVideoName: '',
-      uploadedTrailerVideoPreview: null,
+      uploadedTrailerVideoPreview: null
     });
-  }
+  };
 
   // ----------------------------------------------------------------- ModUploadVideo
   handleUploadVideoOpen = () => {
@@ -240,14 +262,17 @@ class CourseLanding extends React.PureComponent {
     this.setState({ openModUploadVideo: false });
   };
 
-  handleUploadVideoSuccess = (id) => {
-    this.uploadedVideoService.getUploadedVideo(id)
-      .then(data => this.setState({
-        uploadedTrailerVideoId: id,
-        openModUploadVideo: false,
-        uploadedTrailerVideoName: data.name,
-        uploadedTrailerVideoPreview: data.embedded_video,
-      }))
+  handleUploadVideoSuccess = id => {
+    this.uploadedVideoService
+      .getUploadedVideo(id)
+      .then(data =>
+        this.setState({
+          uploadedTrailerVideoId: id,
+          openModUploadVideo: false,
+          uploadedTrailerVideoName: data.name,
+          uploadedTrailerVideoPreview: data.embedded_video
+        })
+      )
       .catch(this.catchGeneralError);
   };
 
@@ -261,15 +286,16 @@ class CourseLanding extends React.PureComponent {
       }
     }
 
-    this.props.enqueueSnackbar('The action was not success.', { variant: 'error' });
-    this.setState({error: newError});
+    this.props.enqueueSnackbar('The action was not success.', {
+      variant: 'error'
+    });
+    this.setState({ error: newError });
   };
 
   catchGeneralError = _ => {
-    this.props.enqueueSnackbar(
-      'Something has gone wrong, please refresh.',
-      { variant: 'error' }
-    );
+    this.props.enqueueSnackbar('Something has gone wrong, please refresh.', {
+      variant: 'error'
+    });
   };
 
   fetchStart = _ => {
@@ -287,6 +313,7 @@ class CourseLanding extends React.PureComponent {
 
   populateSaveData = _ => {
     return {
+      tags: this.state.tags.toString(),
       title: this.state.title,
       headline: this.state.headline,
       description: this.state.description,
@@ -298,12 +325,15 @@ class CourseLanding extends React.PureComponent {
       language: this.state.language,
       level: this.state.level,
       instructor: this.state.instructor,
-      subscription_plans: this.state.subscriptionPlans,
+      subscription_plans: this.state.subscriptionPlans
     };
   };
 
   refresh = _ => {
-    const { match: { params }, mode } = this.props;
+    const {
+      match: { params },
+      mode
+    } = this.props;
     let savedDataPromise = Promise.resolve(null);
 
     this.fetchStart();
@@ -332,7 +362,9 @@ class CourseLanding extends React.PureComponent {
           level: data.level,
           instructor: data.instructor,
           subscriptionPlans: data.subscription_plans,
+          tags: data.tags.map(tag => tag.name)
         });
+        console.log(data.tags.map(tag => tag.name));
 
         // Fetch subcategories from backend
         if (data.category) {
@@ -342,30 +374,48 @@ class CourseLanding extends React.PureComponent {
 
       // Simulate subcategories data from backend
       return { results: [] };
-    })
+    });
 
     Promise.all([
+      this.tagService.listAllTags(),
       this.languageService.listAllLanguages(),
       this.levelService.listAllLevels(),
       this.categoryService.listAllCategories(),
       this.userService.listAllInstructors(),
       this.subscriptionPlanService.listAllSubscriptionPlans(),
-      subCategoryPromise,
+      subCategoryPromise
     ])
       .then(dataList => {
-        const languageData = dataList[0].results;
-        const levelData = dataList[1].results;
-        const categoryData = dataList[2].results;
-        const instructorData = dataList[3].results;
-        const allSubscriptionPlanData = dataList[4].results;
-        const subcategoryData = dataList[5].results;
+        const tagData = dataList[0].results;
+        const languageData = dataList[1].results;
+        const levelData = dataList[2].results;
+        const categoryData = dataList[3].results;
+        const instructorData = dataList[4].results;
+        const allSubscriptionPlanData = dataList[5].results;
+        const subcategoryData = dataList[6].results;
         const nextState = {
-          languages: languageData.map(item => ({ value: item.id, label: item.name })),
+          allTags: tagData,
+          languages: languageData.map(item => ({
+            value: item.id,
+            label: item.name
+          })),
           levels: levelData.map(item => ({ value: item.id, label: item.name })),
-          categories: categoryData.map(item => ({ value: item.id, label: item.name })),
-          instructors: instructorData.map(item => ({ value: item.id, label: item.full_name })),
-          allSubscriptionPlans: allSubscriptionPlanData.map(item => ({ value: item.id, label: item.name })),
-          subcategories: subcategoryData.map(item => ({ value: item.id, label: item.name })),
+          categories: categoryData.map(item => ({
+            value: item.id,
+            label: item.name
+          })),
+          instructors: instructorData.map(item => ({
+            value: item.id,
+            label: item.full_name
+          })),
+          allSubscriptionPlans: allSubscriptionPlanData.map(item => ({
+            value: item.id,
+            label: item.name
+          })),
+          subcategories: subcategoryData.map(item => ({
+            value: item.id,
+            label: item.name
+          }))
         };
 
         this.setState(nextState);
@@ -379,10 +429,7 @@ class CourseLanding extends React.PureComponent {
   }
 
   render() {
-    const {
-      classes,
-      mode
-    } = this.props;
+    const { classes, mode } = this.props;
 
     const {
       loading,
@@ -406,35 +453,37 @@ class CourseLanding extends React.PureComponent {
       instructor,
       instructors,
       subscriptionPlans,
+      tags,
+      allTags,
       allSubscriptionPlans,
       openModSelectImage,
       openModSelectVideo,
       openModUploadImage,
-      openModUploadVideo,
+      openModUploadVideo
     } = this.state;
 
     return (
       <form className={classes.form}>
         {error.non_field_errors && (
-          <Typography variant='body1' className={classes.otherError}>
+          <Typography variant="body1" className={classes.otherError}>
             {error.non_field_errors}
           </Typography>
         )}
 
         {error.detail && (
-          <Typography variant='body1' className={classes.otherError}>
+          <Typography variant="body1" className={classes.otherError}>
             {error.detail}
           </Typography>
         )}
-        
+
         <FormControlLabel
-          label='Publish This Course'
+          label="Publish This Course"
           control={
             <Switch
               checked={published}
               onChange={this.handleChange}
-              name='published'
-              color='primary'
+              name="published"
+              color="primary"
             />
           }
         />
@@ -442,12 +491,12 @@ class CourseLanding extends React.PureComponent {
         <TextField
           fullWidth
           required
-          label='Title'
-          name='title'
-          margin='normal'
-          variant='filled'
+          label="Title"
+          name="title"
+          margin="normal"
+          variant="filled"
           InputLabelProps={{
-            shrink: true,
+            shrink: true
           }}
           value={title}
           onChange={this.handleChange}
@@ -458,12 +507,12 @@ class CourseLanding extends React.PureComponent {
         <TextField
           fullWidth
           required
-          label='Headline'
-          name='headline'
-          margin='normal'
-          variant='filled'
+          label="Headline"
+          name="headline"
+          margin="normal"
+          variant="filled"
           InputLabelProps={{
-            shrink: true,
+            shrink: true
           }}
           value={headline}
           onChange={this.handleChange}
@@ -472,8 +521,8 @@ class CourseLanding extends React.PureComponent {
         />
 
         <TextEditor
-          label='Description'
-          name='description'
+          label="Description"
+          name="description"
           value={description}
           onChange={this.handleChange}
           error={!!error.description}
@@ -488,10 +537,10 @@ class CourseLanding extends React.PureComponent {
             error: !!error.language,
             helperText: error.language,
             InputLabelProps: {
-              shrink: true,
-            },
+              shrink: true
+            }
           }}
-          name='language'
+          name="language"
           value={language}
           options={languages}
           onChange={this.handleChange}
@@ -505,10 +554,10 @@ class CourseLanding extends React.PureComponent {
             error: !!error.level,
             helperText: error.level,
             InputLabelProps: {
-              shrink: true,
-            },
+              shrink: true
+            }
           }}
-          name='level'
+          name="level"
           value={level}
           options={levels}
           onChange={this.handleChange}
@@ -522,10 +571,10 @@ class CourseLanding extends React.PureComponent {
             error: !!error.category,
             helperText: error.category,
             InputLabelProps: {
-              shrink: true,
-            },
+              shrink: true
+            }
           }}
-          name='category'
+          name="category"
           value={category}
           options={categories}
           onChange={this.handleCategoryChange}
@@ -539,10 +588,10 @@ class CourseLanding extends React.PureComponent {
             error: !!error.subcategory,
             helperText: error.subcategory,
             InputLabelProps: {
-              shrink: true,
-            },
+              shrink: true
+            }
           }}
-          name='subcategory'
+          name="subcategory"
           value={subcategory}
           options={subcategories}
           onChange={this.handleChange}
@@ -556,10 +605,10 @@ class CourseLanding extends React.PureComponent {
             error: !!error.instructor,
             helperText: error.instructor,
             InputLabelProps: {
-              shrink: true,
-            },
+              shrink: true
+            }
           }}
-          name='instructor'
+          name="instructor"
           value={instructor}
           options={instructors}
           onChange={this.handleChange}
@@ -574,12 +623,22 @@ class CourseLanding extends React.PureComponent {
             error: !!error.subscription_plans,
             helperText: error.subscription_plans,
             InputLabelProps: {
-              shrink: true,
-            },
+              shrink: true
+            }
           }}
-          name='subscriptionPlans'
+          name="subscriptionPlans"
           value={subscriptionPlans}
           options={allSubscriptionPlans}
+          onChange={this.handleChange}
+        />
+
+        <SelectInput
+          isMulti
+          isCreatable
+          name="tags"
+          textFieldProps={{ label: 'Tags' }}
+          value={tags}
+          options={allTags}
           onChange={this.handleChange}
         />
 
@@ -588,19 +647,20 @@ class CourseLanding extends React.PureComponent {
         <Grid container spacing={24}>
           <Grid item xs={12} sm={6}>
             <img
-              alt='course'
-              style={{width: '100%'}}
-              src={uploadedCoverImagePreview
-                ? uploadedCoverImagePreview
-                : process.env.PUBLIC_URL + '/course_image.png'
+              alt="course"
+              style={{ width: '100%' }}
+              src={
+                uploadedCoverImagePreview
+                  ? uploadedCoverImagePreview
+                  : process.env.PUBLIC_URL + '/course_image.png'
               }
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
             <Button
-              variant='contained'
-              color='secondary'
+              variant="contained"
+              color="secondary"
               className={classes.button}
               onClick={this.handleImageOpen}
             >
@@ -608,8 +668,8 @@ class CourseLanding extends React.PureComponent {
               <FolderOpenIcon className={classes.rightIcon} />
             </Button>
             <Button
-              variant='contained'
-              color='default'
+              variant="contained"
+              color="default"
               className={classes.button}
               onClick={this.handleUploadImageOpen}
             >
@@ -622,23 +682,24 @@ class CourseLanding extends React.PureComponent {
                 icon={<ImageIcon />}
                 label={`File: ${uploadedCoverImageName}`}
                 clickable
-                color='primary'
+                color="primary"
                 onDelete={this.handleDiscardImage}
               />
             )}
-
           </Grid>
 
           <Grid item xs={12} sm={6}>
             {uploadedTrailerVideoPreview ? (
-              <div 
+              <div
                 className={classes.iframeContainer}
-                dangerouslySetInnerHTML={{__html: uploadedTrailerVideoPreview}}
+                dangerouslySetInnerHTML={{
+                  __html: uploadedTrailerVideoPreview
+                }}
               />
             ) : (
               <img
-                alt='course video'
-                style={{width: '100%'}}
+                alt="course video"
+                style={{ width: '100%' }}
                 src={process.env.PUBLIC_URL + '/course_video.png'}
               />
             )}
@@ -646,8 +707,8 @@ class CourseLanding extends React.PureComponent {
 
           <Grid item xs={12} sm={6}>
             <Button
-              variant='contained'
-              color='secondary'
+              variant="contained"
+              color="secondary"
               className={classes.button}
               onClick={this.handleVideoOpen}
             >
@@ -655,8 +716,8 @@ class CourseLanding extends React.PureComponent {
               <FolderOpenIcon className={classes.rightIcon} />
             </Button>
             <Button
-              variant='contained'
-              color='default'
+              variant="contained"
+              color="default"
               className={classes.button}
               onClick={this.handleUploadVideoOpen}
             >
@@ -669,7 +730,7 @@ class CourseLanding extends React.PureComponent {
                 icon={<VideocamIcon />}
                 label={`File: ${uploadedTrailerVideoName}`}
                 clickable
-                color='primary'
+                color="primary"
                 onDelete={this.handleDiscardVideo}
               />
             )}
@@ -702,8 +763,8 @@ class CourseLanding extends React.PureComponent {
 
         <LoadingButton
           fullWidth
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
           loading={loading}
           className={classes.submit}
           onClick={this.handleSave}
@@ -717,15 +778,15 @@ class CourseLanding extends React.PureComponent {
 
 CourseLanding.propTypes = {
   mode: PropTypes.oneOf(['create', 'update']).isRequired,
-  onSaveSuccess: PropTypes.func,
+  onSaveSuccess: PropTypes.func
 };
 
 CourseLanding.defaultProps = {
-  onSaveSuccess: () => {},
+  onSaveSuccess: () => {}
 };
 
 export default compose(
   withStyles(styles, { withTheme: true }),
   withSnackbar,
-  withRouter,
+  withRouter
 )(CourseLanding);

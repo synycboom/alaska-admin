@@ -12,56 +12,57 @@ import MenuItem from '@material-ui/core/MenuItem';
 import CancelIcon from '@material-ui/icons/Cancel';
 import { emphasize } from '@material-ui/core/styles/colorManipulator';
 
-
 const styles = theme => ({
   input: {
     display: 'flex',
-    padding: '20px 12px 10px',
+    padding: '20px 12px 10px'
   },
   valueContainer: {
     display: 'flex',
     flexWrap: 'wrap',
     flex: 1,
     alignItems: 'center',
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
   chip: {
-    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 4}px`,
+    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 4}px`
   },
   chipFocused: {
     backgroundColor: emphasize(
-      theme.palette.type === 'light' ? theme.palette.grey[300] : theme.palette.grey[700],
-      0.08,
-    ),
+      theme.palette.type === 'light'
+        ? theme.palette.grey[300]
+        : theme.palette.grey[700],
+      0.08
+    )
   },
   noOptionsMessage: {
-    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`
   },
   singleValue: {
-    fontSize: 16,
+    fontSize: 16
   },
   placeholder: {
     position: 'absolute',
     left: 2,
     fontSize: 16,
-    zIndex: 1,
+    zIndex: 1
   },
   paper: {
     position: 'absolute',
     zIndex: 2,
     marginTop: theme.spacing.unit,
     left: 0,
-    right: 0,
+    right: 0
   },
   divider: {
-    height: theme.spacing.unit * 2,
-  },
+    height: theme.spacing.unit * 2
+  }
 });
 
 function NoOptionsMessage(props) {
   return (
     <Typography
-      color='textSecondary'
+      color="textSecondary"
       className={props.selectProps.classes.noOptionsMessage}
       {...props.innerProps}
     >
@@ -84,8 +85,8 @@ function Control(props) {
           className: props.selectProps.classes.input,
           inputRef: props.innerRef,
           children: props.children,
-          ...props.innerProps,
-        },
+          ...props.innerProps
+        }
       }}
       {...props.selectProps.textFieldProps}
     />
@@ -97,9 +98,9 @@ function Option(props) {
     <MenuItem
       buttonRef={props.innerRef}
       selected={props.isFocused}
-      component='div'
+      component="div"
       style={{
-        fontWeight: props.isSelected ? 500 : 400,
+        fontWeight: props.isSelected ? 500 : 400
       }}
       {...props.innerProps}
     >
@@ -111,7 +112,7 @@ function Option(props) {
 function Placeholder(props) {
   return (
     <Typography
-      color='textSecondary'
+      color="textSecondary"
       className={props.selectProps.classes.placeholder}
       {...props.innerProps}
     >
@@ -122,14 +123,21 @@ function Placeholder(props) {
 
 function SingleValue(props) {
   return (
-    <Typography className={props.selectProps.classes.singleValue} {...props.innerProps}>
+    <Typography
+      className={props.selectProps.classes.singleValue}
+      {...props.innerProps}
+    >
       {props.children}
     </Typography>
   );
 }
 
 function ValueContainer(props) {
-  return <div className={props.selectProps.classes.valueContainer}>{props.children}</div>;
+  return (
+    <div className={props.selectProps.classes.valueContainer}>
+      {props.children}
+    </div>
+  );
 }
 
 function MultiValue(props) {
@@ -138,7 +146,7 @@ function MultiValue(props) {
       tabIndex={-1}
       label={props.children}
       className={classNames(props.selectProps.classes.chip, {
-        [props.selectProps.classes.chipFocused]: props.isFocused,
+        [props.selectProps.classes.chipFocused]: props.isFocused
       })}
       onDelete={props.removeProps.onClick}
       deleteIcon={<CancelIcon {...props.removeProps} />}
@@ -149,8 +157,8 @@ function MultiValue(props) {
 function Menu(props) {
   return (
     <Paper
-      square 
-      className={props.selectProps.classes.paper} 
+      square
+      className={props.selectProps.classes.paper}
       {...props.innerProps}
     >
       {props.children}
@@ -166,21 +174,46 @@ const components = {
   Option,
   Placeholder,
   SingleValue,
-  ValueContainer,
+  ValueContainer
 };
 
 class SelectInput extends React.Component {
-  handleChange = (value) => {
+  state = {
+    addedOptions: []
+  };
+
+  handleChange = value => {
     if (value instanceof Array) {
       value = value.map(item => item.value);
-    } else if (value && typeof value === 'object'){
+    } else if (value && typeof value === 'object') {
       value = value.value;
     }
-    
+
     const event = {
       target: {
         name: this.props.name,
-        value: value,
+        value: value
+      }
+    };
+
+    this.props.onChange(event);
+  };
+
+  onCreateOption = inputValue => {
+    // Call when option was created. When this method is called, the onChange() won't be called
+    this.setState({
+      addedOptions: [
+        {
+          label: inputValue,
+          value: inputValue
+        }
+      ]
+    });
+
+    const event = {
+      target: {
+        name: this.props.name,
+        value: [...this.props.value, inputValue]
       }
     };
 
@@ -192,13 +225,13 @@ class SelectInput extends React.Component {
       return {
         label: optionLabel,
         value: inputValue,
-        __isNew__: true,
-      }
+        __isNew__: true
+      };
     }
   };
 
   render() {
-    const { 
+    const {
       classes,
       theme,
       options,
@@ -206,7 +239,7 @@ class SelectInput extends React.Component {
       isMulti,
       isCreatable,
       textFieldProps,
-      placeholder,
+      placeholder
     } = this.props;
 
     const selectStyles = {
@@ -214,22 +247,21 @@ class SelectInput extends React.Component {
         ...base,
         color: theme.palette.text.primary,
         '& input': {
-          font: 'inherit',
-        },
-      }),
+          font: 'inherit'
+        }
+      })
     };
 
-    // Automatically find a value from the options 
+    // Automatically find a value from the options
     let derivedValue;
+    const derivedOptions = [...options, ...this.state.addedOptions];
 
     if (value instanceof Array) {
-      derivedValue = value.map(val => options.find(
-        option => option.value === val
-      ));
-    } else if (value) {
-      derivedValue = options.find(
-        option => option.value === value
+      derivedValue = value.map(val =>
+        derivedOptions.find(option => option.value === val)
       );
+    } else if (value) {
+      derivedValue = derivedOptions.find(option => option.value === value);
     } else {
       // value doesn't have a truth value maybe it's null or undefined
       // don't do anything here
@@ -241,12 +273,13 @@ class SelectInput extends React.Component {
           classes={classes}
           styles={selectStyles}
           textFieldProps={textFieldProps}
-          options={options}
+          options={derivedOptions}
           components={components}
           value={derivedValue}
           onChange={this.handleChange}
           placeholder={placeholder}
           getNewOptionData={this.getNewOptionData}
+          onCreateOption={this.onCreateOption}
           isMulti
         />
       );
@@ -256,7 +289,7 @@ class SelectInput extends React.Component {
           classes={classes}
           styles={selectStyles}
           textFieldProps={textFieldProps}
-          options={options}
+          options={derivedOptions}
           components={components}
           value={derivedValue}
           onChange={this.handleChange}
@@ -271,7 +304,7 @@ class SelectInput extends React.Component {
           classes={classes}
           styles={selectStyles}
           textFieldProps={textFieldProps}
-          options={options}
+          options={derivedOptions}
           components={components}
           value={derivedValue}
           onChange={this.handleChange}
@@ -291,13 +324,13 @@ SelectInput.propTypes = {
   isCreatable: PropTypes.bool,
   textFieldProps: PropTypes.object,
   options: PropTypes.array.isRequired,
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func.isRequired
 };
 
 SelectInput.defaultProps = {
   placeholder: '',
   options: [],
-  onChange: () => {},
+  onChange: () => {}
 };
 
 export default withStyles(styles, { withTheme: true })(SelectInput);

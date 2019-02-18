@@ -17,30 +17,29 @@ const styles = theme => ({
   paper: {
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
-    paddingBottom: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2
   },
   otherError: {
-    color: theme.palette.error.main,
+    color: theme.palette.error.main
   },
   iframeContainer: {
     background: 'black',
     '& iframe': {
-      width: '100%',
-    },
+      width: '100%'
+    }
   },
   image: {
     marginTop: '10px',
-    width: '100%',
+    width: '100%'
   },
   form: {
     width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing.unit,
+    marginTop: theme.spacing.unit
   },
   submit: {
-    marginTop: theme.spacing.unit * 3,
-  },
+    marginTop: theme.spacing.unit * 3
+  }
 });
-
 
 class UploadedVideoCreate extends React.PureComponent {
   uploadedVideoService = new UploadedVideoService();
@@ -51,8 +50,8 @@ class UploadedVideoCreate extends React.PureComponent {
     duration: '',
     tags: '',
     non_field_errors: '',
-    detail: '',
-  }
+    detail: ''
+  };
   state = {
     name: '',
     embeddedVideo: '',
@@ -60,7 +59,7 @@ class UploadedVideoCreate extends React.PureComponent {
     tags: [],
     allTags: [],
     loading: false,
-    error: {...this.initialError},
+    error: { ...this.initialError }
   };
 
   onCancelFile = () => {
@@ -84,64 +83,63 @@ class UploadedVideoCreate extends React.PureComponent {
 
   loadData = () => {
     this.setState({ loading: true });
-    this.tagService.listAllTags()
+    this.tagService
+      .listAllTags()
       .then(data => {
         this.setState({ allTags: data.results });
       })
       .catch(this.catchError)
-      .then(() => this.setState({loading: false}));
+      .then(() => this.setState({ loading: false }));
   };
 
   catchError = error => {
     let newError = {};
-    
+
     for (let key in error) {
       if (error.hasOwnProperty(key)) {
-        newError[key] = error[key];  
+        newError[key] = error[key];
       }
     }
 
-    this.setState({error: newError});
+    this.setState({ error: newError });
   };
 
-  handleChange = (event) => {
+  handleChange = event => {
     this.setState({
       [event.target.name]: event.target.value
     });
-  }
+  };
 
   handleSave = () => {
     const { enqueueSnackbar, onSaveSuccess } = this.props;
     const { name, embeddedVideo, tags, duration } = this.state;
     const formData = new FormData();
-    
+
     formData.append('name', name);
     formData.append('embedded_video', embeddedVideo);
     formData.append('duration', duration);
-    formData.append('tags', tags.map(item => item.value));
+    formData.append('tags', tags);
 
-    this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedVideoService.createUploadedVideo(formData)
+    this.setState({ error: { ...this.initialError }, loading: true });
+    this.uploadedVideoService
+      .createUploadedVideo(formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
-        onSaveSuccess(data.id)
+        onSaveSuccess(data.id);
         this.handleBack();
       })
       .catch(this.catchError)
       .then(() => this.setState({ loading: false }));
-  }
+  };
 
   handleBack = () => {
     if (!this.props.withoutHeader) {
       this.props.history.goBack();
     }
-  }
-  
+  };
+
   render() {
-    const { 
-      classes,
-      withoutHeader,
-    } = this.props;
+    const { classes, withoutHeader } = this.props;
 
     const {
       error,
@@ -150,26 +148,26 @@ class UploadedVideoCreate extends React.PureComponent {
       duration,
       tags,
       allTags,
-      loading,
+      loading
     } = this.state;
 
     return (
-      <Create 
-        onSave={this.handleSave} 
-        onBack={this.handleBack} 
+      <Create
+        onSave={this.handleSave}
+        onBack={this.handleBack}
         loading={loading}
         withoutHeader={withoutHeader}
-        text='Upload Video'
+        text="Upload Video"
       >
         <React.Fragment>
           {error.non_field_errors && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.non_field_errors}
             </Typography>
           )}
 
           {error.detail && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.detail}
             </Typography>
           )}
@@ -177,12 +175,12 @@ class UploadedVideoCreate extends React.PureComponent {
           <TextField
             fullWidth
             required
-            label='Name'
-            name='name'
-            margin='normal'
-            variant='filled'
+            label="Name"
+            name="name"
+            margin="normal"
+            variant="filled"
             InputLabelProps={{
-              shrink: true,
+              shrink: true
             }}
             value={name}
             onChange={this.handleChange}
@@ -200,10 +198,10 @@ class UploadedVideoCreate extends React.PureComponent {
               error: !!error.tags,
               helperText: error.tags,
               InputLabelProps: {
-                shrink: true,
-              },
+                shrink: true
+              }
             }}
-            name='tags'
+            name="tags"
             value={tags}
             options={allTags}
             onChange={this.handleChange}
@@ -212,28 +210,28 @@ class UploadedVideoCreate extends React.PureComponent {
           <TextField
             fullWidth
             required
-            label='Vimeo Embedded Code'
-            name='embeddedVideo'
-            margin='normal'
-            variant='filled'
+            label="Vimeo Embedded Code"
+            name="embeddedVideo"
+            margin="normal"
+            variant="filled"
             InputLabelProps={{
-              shrink: true,
+              shrink: true
             }}
             value={embeddedVideo}
             onChange={this.handleChange}
             error={!!error.embedded_video}
             helperText={error.embedded_video}
           />
-          
+
           <TextField
             fullWidth
             required
-            label='Duration'
-            name='duration'
-            margin='normal'
-            variant='filled'
+            label="Duration"
+            name="duration"
+            margin="normal"
+            variant="filled"
             InputLabelProps={{
-              shrink: true,
+              shrink: true
             }}
             value={duration}
             onChange={this.handleChange}
@@ -241,9 +239,9 @@ class UploadedVideoCreate extends React.PureComponent {
             helperText={error.duration}
           />
 
-          <div 
-            className={classes.iframeContainer} 
-            dangerouslySetInnerHTML={{__html: embeddedVideo}} 
+          <div
+            className={classes.iframeContainer}
+            dangerouslySetInnerHTML={{ __html: embeddedVideo }}
           />
         </React.Fragment>
       </Create>
@@ -254,14 +252,14 @@ class UploadedVideoCreate extends React.PureComponent {
 UploadedVideoCreate.propTypes = {
   classes: PropTypes.object.isRequired,
   withoutHeader: PropTypes.bool,
-  onSaveSuccess: PropTypes.func,
+  onSaveSuccess: PropTypes.func
 };
 
 UploadedVideoCreate.defaultProps = {
-  onSaveSuccess() {},
+  onSaveSuccess() {}
 };
 
 export default compose(
   withStyles(styles, { withTheme: true }),
-  withSnackbar,
+  withSnackbar
 )(UploadedVideoCreate);

@@ -12,35 +12,33 @@ import TagService from '../../apis/TagService';
 import Edit from '../../components/Edit';
 import SelectInput from '../../components/SelectInput';
 
-
 const styles = theme => ({
   paper: {
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
-    paddingBottom: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2
   },
   otherError: {
-    color: theme.palette.error.main,
+    color: theme.palette.error.main
   },
   iframeContainer: {
     background: 'black',
     '& iframe': {
-      width: '100%',
-    },
+      width: '100%'
+    }
   },
   image: {
     marginTop: '10px',
-    width: '100%',
+    width: '100%'
   },
   form: {
     width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing.unit,
+    marginTop: theme.spacing.unit
   },
   submit: {
-    marginTop: theme.spacing.unit * 3,
-  },
+    marginTop: theme.spacing.unit * 3
+  }
 });
-
 
 class UploadedVideoEdit extends React.PureComponent {
   uploadedVideoService = new UploadedVideoService();
@@ -52,8 +50,8 @@ class UploadedVideoEdit extends React.PureComponent {
     embedded_video: '',
     tags: '',
     non_field_errors: '',
-    detail: '',
-  }
+    detail: ''
+  };
   state = {
     name: '',
     duration: 0,
@@ -62,7 +60,7 @@ class UploadedVideoEdit extends React.PureComponent {
     allTags: [],
     encodedVideos: [],
     loading: false,
-    error: {...this.initialError},
+    error: { ...this.initialError }
   };
 
   componentDidMount() {
@@ -78,50 +76,60 @@ class UploadedVideoEdit extends React.PureComponent {
       }
     }
 
-    this.setState({error: newError});
+    this.setState({ error: newError });
   };
 
   loadData() {
-    const { match: { params } } = this.props;
+    const {
+      match: { params }
+    } = this.props;
 
     this.setState({ loading: true });
-    const promise1 = this.tagService.listAllTags()
+    const promise1 = this.tagService
+      .listAllTags()
       .then(data => this.setState({ allTags: data.results }))
       .catch(this.catchError);
 
-    const promise2 = this.uploadedVideoService.getUploadedVideo(params.id)
-      .then(data => this.setState({
-        name: data.name,
-        embeddedVideo: data.embedded_video,
-        duration: data.duration,
-        tags: data.tags,
-      }))
+    const promise2 = this.uploadedVideoService
+      .getUploadedVideo(params.id)
+      .then(data =>
+        this.setState({
+          name: data.name,
+          embeddedVideo: data.embedded_video,
+          duration: data.duration,
+          tags: data.tags.map(tag => tag.name)
+        })
+      )
       .catch(this.catchError);
 
     Promise.all([promise1, promise2])
       .then(() => null)
       .catch(() => null)
-      .then(() => this.setState({loading: false}));
+      .then(() => this.setState({ loading: false }));
   }
 
-  handleChange = (event) => {
+  handleChange = event => {
     this.setState({
       [event.target.name]: event.target.value
-    })
-  }
+    });
+  };
 
   handleSave = () => {
-    const { enqueueSnackbar, match: { params } } = this.props;
+    const {
+      enqueueSnackbar,
+      match: { params }
+    } = this.props;
     const { name, duration, tags, embeddedVideo } = this.state;
     const formData = new FormData();
 
     formData.append('name', name);
     formData.append('duration', duration);
     formData.append('embedded_video', embeddedVideo);
-    formData.append('tags', tags.map(item => item.value));
-    
-    this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedVideoService.updateUploadedVideo(params.id, formData)
+    formData.append('tags', tags);
+
+    this.setState({ error: { ...this.initialError }, loading: true });
+    this.uploadedVideoService
+      .updateUploadedVideo(params.id, formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
       })
@@ -134,24 +142,28 @@ class UploadedVideoEdit extends React.PureComponent {
           }
         }
 
-        this.setState({error: newError});
+        this.setState({ error: newError });
       })
       .then(() => {
         this.setState({
           loading: false
         });
-      })
-  }
+      });
+  };
 
   handleBack = () => {
     this.props.history.goBack();
-  }
+  };
 
   handleDelete = () => {
-    const { enqueueSnackbar, match: { params } } = this.props;
+    const {
+      enqueueSnackbar,
+      match: { params }
+    } = this.props;
 
-    this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedVideoService.deleteUploadedVideo(params.id)
+    this.setState({ error: { ...this.initialError }, loading: true });
+    this.uploadedVideoService
+      .deleteUploadedVideo(params.id)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         this.handleBack();
@@ -165,14 +177,14 @@ class UploadedVideoEdit extends React.PureComponent {
           }
         }
 
-        this.setState({error: newError});
+        this.setState({ error: newError });
       })
       .then(() => {
         this.setState({
           loading: false
         });
-      })
-  }
+      });
+  };
 
   render() {
     const { classes } = this.props;
@@ -183,7 +195,7 @@ class UploadedVideoEdit extends React.PureComponent {
       embeddedVideo,
       tags,
       allTags,
-      loading,
+      loading
     } = this.state;
 
     return (
@@ -192,18 +204,18 @@ class UploadedVideoEdit extends React.PureComponent {
         onBack={this.handleBack}
         onDelete={this.handleDelete}
         loading={loading}
-        text='Edit Uploaded Video'
+        text="Edit Uploaded Video"
         confirmDeleteDetail="Model's fields that has this file will be set to null"
       >
         <React.Fragment>
           {error.non_field_errors && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.non_field_errors}
             </Typography>
           )}
 
           {error.detail && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.detail}
             </Typography>
           )}
@@ -211,12 +223,12 @@ class UploadedVideoEdit extends React.PureComponent {
           <TextField
             fullWidth
             required
-            label='Name'
-            name='name'
-            margin='normal'
-            variant='filled'
+            label="Name"
+            name="name"
+            margin="normal"
+            variant="filled"
             InputLabelProps={{
-              shrink: true,
+              shrink: true
             }}
             value={name}
             onChange={this.handleChange}
@@ -234,10 +246,10 @@ class UploadedVideoEdit extends React.PureComponent {
               error: !!error.tags,
               helperText: error.tags,
               InputLabelProps: {
-                shrink: true,
-              },
+                shrink: true
+              }
             }}
-            name='tags'
+            name="tags"
             value={tags}
             options={allTags}
             onChange={this.handleChange}
@@ -246,28 +258,28 @@ class UploadedVideoEdit extends React.PureComponent {
           <TextField
             fullWidth
             required
-            label='Vimeo Embedded Code'
-            name='embeddedVideo'
-            margin='normal'
-            variant='filled'
+            label="Vimeo Embedded Code"
+            name="embeddedVideo"
+            margin="normal"
+            variant="filled"
             InputLabelProps={{
-              shrink: true,
+              shrink: true
             }}
             value={embeddedVideo}
             onChange={this.handleChange}
             error={!!error.embedded_video}
             helperText={error.embedded_video}
           />
-          
+
           <TextField
             fullWidth
             required
-            label='Duration'
-            name='duration'
-            margin='normal'
-            variant='filled'
+            label="Duration"
+            name="duration"
+            margin="normal"
+            variant="filled"
             InputLabelProps={{
-              shrink: true,
+              shrink: true
             }}
             value={duration}
             onChange={this.handleChange}
@@ -275,9 +287,9 @@ class UploadedVideoEdit extends React.PureComponent {
             helperText={error.duration}
           />
 
-          <div 
-            className={classes.iframeContainer} 
-            dangerouslySetInnerHTML={{__html: embeddedVideo}} 
+          <div
+            className={classes.iframeContainer}
+            dangerouslySetInnerHTML={{ __html: embeddedVideo }}
           />
         </React.Fragment>
       </Edit>
@@ -287,5 +299,5 @@ class UploadedVideoEdit extends React.PureComponent {
 
 export default compose(
   withStyles(styles, { withTheme: true }),
-  withSnackbar,
+  withSnackbar
 )(UploadedVideoEdit);

@@ -18,15 +18,14 @@ import Create from '../../components/Create';
 import SelectInput from '../../components/SelectInput';
 import { formatBytes } from '../../utils/file';
 
-
 const styles = theme => ({
   paper: {
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
-    paddingBottom: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2
   },
   otherError: {
-    color: theme.palette.error.main,
+    color: theme.palette.error.main
   },
   dropzone: {
     borderWidth: 2,
@@ -35,21 +34,20 @@ const styles = theme => ({
     borderRadius: 5,
     cursor: 'pointer',
     padding: 10,
-    marginTop: 20,
+    marginTop: 20
   },
   image: {
     marginTop: '10px',
-    width: '100%',
+    width: '100%'
   },
   form: {
     width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing.unit,
+    marginTop: theme.spacing.unit
   },
   submit: {
-    marginTop: theme.spacing.unit * 3,
-  },
+    marginTop: theme.spacing.unit * 3
+  }
 });
-
 
 class UploadedImageCreate extends React.PureComponent {
   uploadedImageService = new UploadedImageService();
@@ -59,27 +57,27 @@ class UploadedImageCreate extends React.PureComponent {
     file: '',
     tags: '',
     non_field_errors: '',
-    detail: '',
-  }
+    detail: ''
+  };
   state = {
     name: '',
     file: null,
     tags: [],
     allTags: [],
     loading: false,
-    error: {...this.initialError},
+    error: { ...this.initialError }
   };
 
   onDrop = ([file]) => {
     if (file) {
       this.setState(state => {
         this.revokeObjectUrl(state.file);
-        
+
         return {
           file: Object.assign(file, {
             preview: URL.createObjectURL(file)
           })
-        }
+        };
       });
     } else {
       this.setState(state => {
@@ -90,7 +88,7 @@ class UploadedImageCreate extends React.PureComponent {
         };
       });
     }
-  }
+  };
 
   revokeObjectUrl(file) {
     if (file) {
@@ -109,46 +107,48 @@ class UploadedImageCreate extends React.PureComponent {
 
   loadData = () => {
     this.setState({ loading: true });
-    this.tagService.listAllTags()
+    this.tagService
+      .listAllTags()
       .then(data => {
         this.setState({ allTags: data.results });
       })
       .catch(this.catchError)
-      .then(() => this.setState({loading: false}));
+      .then(() => this.setState({ loading: false }));
   };
 
   catchError = error => {
     let newError = {};
-    
+
     for (let key in error) {
       if (error.hasOwnProperty(key)) {
-        newError[key] = error[key];  
+        newError[key] = error[key];
       }
     }
 
-    this.setState({error: newError});
+    this.setState({ error: newError });
   };
 
-  handleChange = (event) => {
+  handleChange = event => {
     this.setState({
       [event.target.name]: event.target.value
     });
-  }
+  };
 
   handleSave = () => {
     const { enqueueSnackbar, onSaveSuccess } = this.props;
     const { name, file, tags } = this.state;
     const formData = new FormData();
-    
+
     formData.append('name', name);
-    formData.append('tags', tags.map(item => item.value));
+    formData.append('tags', tags);
 
     if (file) {
       formData.append('file', file);
     }
 
-    this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedImageService.createUploadedImage(formData)
+    this.setState({ error: { ...this.initialError }, loading: true });
+    this.uploadedImageService
+      .createUploadedImage(formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         onSaveSuccess(data.id);
@@ -156,107 +156,95 @@ class UploadedImageCreate extends React.PureComponent {
       })
       .catch(this.catchError)
       .then(() => this.setState({ loading: false }));
-  }
+  };
 
   handleBack = () => {
     if (!this.props.withoutHeader) {
       this.props.history.goBack();
     }
-  }
-  
-  render() {
-    const { 
-      classes, 
-      withoutHeader, 
-    } = this.props;
+  };
 
-    const {
-      error,
-      name,
-      file,
-      tags,
-      allTags,
-      loading,
-    } = this.state;
+  render() {
+    const { classes, withoutHeader } = this.props;
+
+    const { error, name, file, tags, allTags, loading } = this.state;
 
     return (
-      <Create 
-        onSave={this.handleSave} 
-        onBack={this.handleBack} 
+      <Create
+        onSave={this.handleSave}
+        onBack={this.handleBack}
         loading={loading}
         withoutHeader={withoutHeader}
-        text='Upload Image'
+        text="Upload Image"
       >
         <React.Fragment>
           {error.non_field_errors && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.non_field_errors}
             </Typography>
           )}
 
           {error.detail && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.detail}
             </Typography>
           )}
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel shrink htmlFor='name'>Name</InputLabel>
-            <Input 
-              id='name' 
-              name='name' 
+          <FormControl margin="normal" required fullWidth>
+            <InputLabel shrink htmlFor="name">
+              Name
+            </InputLabel>
+            <Input
+              id="name"
+              name="name"
               value={name}
               autoFocus
-              onChange={this.handleChange} 
+              onChange={this.handleChange}
               error={!!error.name}
             />
-            {error.name && (
-              <FormHelperText error>{error.name}</FormHelperText>
-            )}
+            {error.name && <FormHelperText error>{error.name}</FormHelperText>}
           </FormControl>
 
           <SelectInput
             isMulti
             isCreatable
-            textFieldProps={{label: 'Tags'}}
-            name='tags'
+            textFieldProps={{ label: 'Tags' }}
+            name="tags"
             value={tags}
             options={allTags}
             onChange={this.handleChange}
           />
 
           <div>
-            <Dropzone
-              accept='image/*'
-              maxFiles={1}
-              onDrop={this.onDrop}
-            >
-              {({getRootProps, getInputProps}) => (
+            <Dropzone accept="image/*" maxFiles={1} onDrop={this.onDrop}>
+              {({ getRootProps, getInputProps }) => (
                 <div {...getRootProps()} className={classes.dropzone}>
                   <input {...getInputProps()} />
 
                   {file ? (
                     <img
-                      alt='File'
+                      alt="File"
                       className={classes.image}
                       src={file.preview}
                     />
                   ) : (
                     <div>
-                      <p>Drop an <b>image</b> file here, or click to select an <b>image</b> file</p>
+                      <p>
+                        Drop an <b>image</b> file here, or click to select an{' '}
+                        <b>image</b> file
+                      </p>
                     </div>
                   )}
-                  
+
                   {file && (
                     <h4>{`${file.name} - ${formatBytes(file.size)}`}</h4>
                   )}
-
                 </div>
               )}
             </Dropzone>
 
             {error.file && (
-              <Typography variant='body1' className={classes.otherError}>
+              <Typography variant="body1" className={classes.otherError}>
                 {error.file}
               </Typography>
             )}
@@ -270,14 +258,14 @@ class UploadedImageCreate extends React.PureComponent {
 UploadedImageCreate.propTypes = {
   classes: PropTypes.object.isRequired,
   withoutHeader: PropTypes.bool,
-  onSaveSuccess: PropTypes.func,
-}
+  onSaveSuccess: PropTypes.func
+};
 
 UploadedImageCreate.defaultProps = {
-  onSaveSuccess() {},
+  onSaveSuccess() {}
 };
 
 export default compose(
   withStyles(styles, { withTheme: true }),
-  withSnackbar,
+  withSnackbar
 )(UploadedImageCreate);

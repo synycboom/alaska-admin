@@ -15,15 +15,14 @@ import TagService from '../../apis/TagService';
 import Edit from '../../components/Edit';
 import SelectInput from '../../components/SelectInput';
 
-
 const styles = theme => ({
   paper: {
     ...theme.mixins.gutters(),
     paddingTop: theme.spacing.unit * 2,
-    paddingBottom: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2
   },
   otherError: {
-    color: theme.palette.error.main,
+    color: theme.palette.error.main
   },
   dropzone: {
     borderWidth: 2,
@@ -32,17 +31,16 @@ const styles = theme => ({
     borderRadius: 5,
     cursor: 'pointer',
     padding: 10,
-    marginTop: 20,
+    marginTop: 20
   },
   form: {
     width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing.unit,
+    marginTop: theme.spacing.unit
   },
   submit: {
-    marginTop: theme.spacing.unit * 3,
-  },
+    marginTop: theme.spacing.unit * 3
+  }
 });
-
 
 class UploadedFileEdit extends React.PureComponent {
   uploadedFileService = new UploadedFileService();
@@ -52,15 +50,15 @@ class UploadedFileEdit extends React.PureComponent {
     file: '',
     tags: '',
     non_field_errors: '',
-    detail: '',
-  }
+    detail: ''
+  };
   state = {
     name: '',
     originalFilePath: '',
     tags: [],
     allTags: [],
     loading: false,
-    error: {...this.initialError},
+    error: { ...this.initialError }
   };
 
   onDrop = ([file]) => {
@@ -69,7 +67,7 @@ class UploadedFileEdit extends React.PureComponent {
     } else {
       this.setState({ file: null });
     }
-  }
+  };
 
   onCancelFile = () => {
     this.setState({ file: null });
@@ -81,105 +79,119 @@ class UploadedFileEdit extends React.PureComponent {
 
   catchError = error => {
     let newError = {};
-    
+
     for (let key in error) {
       if (error.hasOwnProperty(key)) {
-        newError[key] = error[key];  
+        newError[key] = error[key];
       }
     }
 
-    this.setState({error: newError});
+    this.setState({ error: newError });
   };
 
   loadData() {
-    const { match: { params } } = this.props;
+    const {
+      match: { params }
+    } = this.props;
 
     this.setState({ loading: true });
-    const promise1 = this.tagService.listAllTags()
+    const promise1 = this.tagService
+      .listAllTags()
       .then(data => this.setState({ allTags: data.results }))
       .catch(this.catchError);
 
-    const promise2 = this.uploadedFileService.getUploadedFile(params.id)
-      .then(data => this.setState({
-        name: data.name, 
-        originalFilePath: data.file, 
-        tags: data.tags,
-      }))
+    const promise2 = this.uploadedFileService
+      .getUploadedFile(params.id)
+      .then(data =>
+        this.setState({
+          name: data.name,
+          originalFilePath: data.file,
+          tags: data.tags.map(tag => tag.name)
+        })
+      )
       .catch(this.catchError);
 
     Promise.all([promise1, promise2])
       .then(() => null)
       .catch(() => null)
-      .then(() => this.setState({loading: false}));
+      .then(() => this.setState({ loading: false }));
   }
 
-  handleChange = (event) => {
+  handleChange = event => {
     this.setState({
       [event.target.name]: event.target.value
-    })
-  }
+    });
+  };
 
   handleSave = () => {
-    const { enqueueSnackbar, match: { params } } = this.props;
+    const {
+      enqueueSnackbar,
+      match: { params }
+    } = this.props;
     const { name, tags } = this.state;
     const formData = new FormData();
-    
-    formData.append('name', name);
-    formData.append('tags', tags.map(item => item.value));
 
-    this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedFileService.updateUploadedFile(params.id, formData)
+    formData.append('name', name);
+    formData.append('tags', tags);
+
+    this.setState({ error: { ...this.initialError }, loading: true });
+    this.uploadedFileService
+      .updateUploadedFile(params.id, formData)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
       })
       .catch(error => {
         let newError = {};
-        
+
         for (let key in error) {
           if (error.hasOwnProperty(key)) {
-            newError[key] = error[key];  
+            newError[key] = error[key];
           }
         }
-        
-        this.setState({error: newError});
+
+        this.setState({ error: newError });
       })
       .then(() => {
-        this.setState({ 
-          loading: false 
+        this.setState({
+          loading: false
         });
-      })
-  }
+      });
+  };
 
   handleBack = () => {
     this.props.history.goBack();
-  }
-  
-  handleDelete = () => {
-    const { enqueueSnackbar, match: { params } } = this.props;
+  };
 
-    this.setState({error: {...this.initialError}, loading: true});
-    this.uploadedFileService.deleteUploadedFile(params.id)
+  handleDelete = () => {
+    const {
+      enqueueSnackbar,
+      match: { params }
+    } = this.props;
+
+    this.setState({ error: { ...this.initialError }, loading: true });
+    this.uploadedFileService
+      .deleteUploadedFile(params.id)
       .then(data => {
         enqueueSnackbar(data.detail, { variant: 'success' });
         this.handleBack();
       })
       .catch(error => {
         let newError = {};
-        
+
         for (let key in error) {
           if (error.hasOwnProperty(key)) {
-            newError[key] = error[key];  
+            newError[key] = error[key];
           }
         }
-        
-        this.setState({error: newError});
+
+        this.setState({ error: newError });
       })
       .then(() => {
-        this.setState({ 
-          loading: false 
+        this.setState({
+          loading: false
         });
-      })
-  }
+      });
+  };
 
   render() {
     const { classes } = this.props;
@@ -190,51 +202,51 @@ class UploadedFileEdit extends React.PureComponent {
       tags,
       allTags,
       originalFilePath,
-      loading,
+      loading
     } = this.state;
 
     return (
-      <Edit 
-        onSave={this.handleSave} 
-        onBack={this.handleBack} 
-        onDelete={this.handleDelete} 
+      <Edit
+        onSave={this.handleSave}
+        onBack={this.handleBack}
+        onDelete={this.handleDelete}
         loading={loading}
-        text='Edit Uploaded File'
+        text="Edit Uploaded File"
         confirmDeleteDetail="Model's fields that has this file will be set to null"
       >
         <React.Fragment>
           {error.non_field_errors && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.non_field_errors}
             </Typography>
           )}
 
           {error.detail && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.detail}
             </Typography>
           )}
 
-          <FormControl margin='normal' required fullWidth>
-            <InputLabel shrink htmlFor='name'>Name</InputLabel>
-            <Input 
-              id='name' 
-              name='name' 
+          <FormControl margin="normal" required fullWidth>
+            <InputLabel shrink htmlFor="name">
+              Name
+            </InputLabel>
+            <Input
+              id="name"
+              name="name"
               value={name}
               autoFocus
-              onChange={this.handleChange} 
+              onChange={this.handleChange}
               error={!!error.name}
             />
-            {error.name && (
-              <FormHelperText error>{error.name}</FormHelperText>
-            )}
+            {error.name && <FormHelperText error>{error.name}</FormHelperText>}
           </FormControl>
 
           <SelectInput
             isMulti
             isCreatable
-            name='tags'
-            textFieldProps={{label: 'Tags'}}
+            name="tags"
+            textFieldProps={{ label: 'Tags' }}
             value={tags}
             options={allTags}
             onChange={this.handleChange}
@@ -247,7 +259,7 @@ class UploadedFileEdit extends React.PureComponent {
           )}
 
           {error.image && (
-            <Typography variant='body1' className={classes.otherError}>
+            <Typography variant="body1" className={classes.otherError}>
               {error.image}
             </Typography>
           )}
@@ -259,5 +271,5 @@ class UploadedFileEdit extends React.PureComponent {
 
 export default compose(
   withStyles(styles, { withTheme: true }),
-  withSnackbar,
+  withSnackbar
 )(UploadedFileEdit);
