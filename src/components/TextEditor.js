@@ -1,13 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { 
-  Editor, 
-  EditorState, 
-  RichUtils, 
-  convertToRaw, 
-  convertFromRaw, 
-} from 'draft-js';
+import { Editor, EditorState, RichUtils } from 'draft-js';
+
+import { stateFromHTML } from 'draft-js-import-html';
+import { stateToHTML } from 'draft-js-export-html';
 
 // Custom overrides for 'code' style.
 const styleMap = {
@@ -15,15 +12,15 @@ const styleMap = {
     backgroundColor: 'rgba(0, 0, 0, 0.05)',
     fontFamily: "'Inconsolata', 'Menlo', 'Consolas', 'monospace'",
     fontSize: 16,
-    padding: 2,
-  },
+    padding: 2
+  }
 };
 
 function getBlockStyle(block) {
   switch (block.getType()) {
-    case 'blockquote': 
+    case 'blockquote':
       return 'RichEditor-blockquote';
-    default: 
+    default:
       return null;
   }
 }
@@ -60,10 +57,10 @@ const BLOCK_TYPES = [
   { label: 'Blockquote', style: 'blockquote' },
   { label: 'UL', style: 'unordered-list-item' },
   { label: 'OL', style: 'ordered-list-item' },
-  { label: 'Code Block', style: 'code-block' },
+  { label: 'Code Block', style: 'code-block' }
 ];
 
-const BlockStyleControls = (props) => {
+const BlockStyleControls = props => {
   const { editorState } = props;
   const selection = editorState.getSelection();
   const blockType = editorState
@@ -72,8 +69,8 @@ const BlockStyleControls = (props) => {
     .getType();
 
   return (
-    <div className='RichEditor-controls'>
-      {BLOCK_TYPES.map((type) =>
+    <div className="RichEditor-controls">
+      {BLOCK_TYPES.map(type => (
         <StyleButton
           key={type.label}
           active={type.style === blockType}
@@ -81,7 +78,7 @@ const BlockStyleControls = (props) => {
           onToggle={props.onToggle}
           style={type.style}
         />
-      )}
+      ))}
     </div>
   );
 };
@@ -90,14 +87,14 @@ var INLINE_STYLES = [
   { label: 'Bold', style: 'BOLD' },
   { label: 'Italic', style: 'ITALIC' },
   { label: 'Underline', style: 'UNDERLINE' },
-  { label: 'Monospace', style: 'CODE' },
+  { label: 'Monospace', style: 'CODE' }
 ];
 
-const InlineStyleControls = (props) => {
+const InlineStyleControls = props => {
   var currentStyle = props.editorState.getCurrentInlineStyle();
   return (
-    <div className='RichEditor-controls'>
-      {INLINE_STYLES.map(type =>
+    <div className="RichEditor-controls">
+      {INLINE_STYLES.map(type => (
         <StyleButton
           key={type.label}
           active={currentStyle.has(type.style)}
@@ -105,14 +102,14 @@ const InlineStyleControls = (props) => {
           onToggle={props.onToggle}
           style={type.style}
         />
-      )}
+      ))}
     </div>
   );
 };
 
 class TextEditor extends React.PureComponent {
   state = {
-    editorState: EditorState.createEmpty(),
+    editorState: EditorState.createEmpty()
   };
 
   focus = _ => {
@@ -127,8 +124,7 @@ class TextEditor extends React.PureComponent {
     // Convert editorState to string before sending it through onChange()
     const { onChange, name } = this.props;
     const { editorState } = this.state;
-    const raw = convertToRaw(editorState.getCurrentContent());
-    const value = JSON.stringify(raw);
+    const value = stateToHTML(editorState.getCurrentContent());
 
     onChange({ target: { name, value } });
   };
@@ -148,34 +144,29 @@ class TextEditor extends React.PureComponent {
     this.handleChange(RichUtils.onTab(event, this.state.editorState, maxDepth));
   };
 
-  toggleBlockType= blockType => {
+  toggleBlockType = blockType => {
     this.handleChange(
-      RichUtils.toggleBlockType(
-        this.state.editorState,
-        blockType
-      )
+      RichUtils.toggleBlockType(this.state.editorState, blockType)
     );
   };
 
   toggleInlineStyle = inlineStyle => {
     this.handleChange(
-      RichUtils.toggleInlineStyle(
-        this.state.editorState,
-        inlineStyle
-      )
+      RichUtils.toggleInlineStyle(this.state.editorState, inlineStyle)
     );
   };
 
   initialState = _ => {
     try {
-      const derivedValue = JSON.parse(this.props.value);
-      this.setState({ 
+      this.setState({
         editorState: EditorState.createWithContent(
-          convertFromRaw(derivedValue)
+          stateFromHTML(this.props.value)
         )
       });
-    } catch(syntaxError) {
-      console.error('You should check the text of this TextEditor, as it has an error below.');
+    } catch (syntaxError) {
+      console.error(
+        'You should check the text of this TextEditor, as it has an error below.'
+      );
       console.error(syntaxError);
     }
   };
@@ -205,7 +196,12 @@ class TextEditor extends React.PureComponent {
     const contentState = editorState.getCurrentContent();
 
     if (!contentState.hasText()) {
-      if (contentState.getBlockMap().first().getType() !== 'unstyled') {
+      if (
+        contentState
+          .getBlockMap()
+          .first()
+          .getType() !== 'unstyled'
+      ) {
         className += ' RichEditor-hidePlaceholder';
       }
     }
@@ -240,17 +236,13 @@ class TextEditor extends React.PureComponent {
               onBlur={this.handleBlur}
               onTab={this.onTab}
               placeholder={placeholder}
-              ref='editor'
+              ref="editor"
               spellCheck={true}
             />
           </div>
         </div>
 
-        {helperText && (
-          <p className={helperTextClassName}>
-            {helperText}
-          </p>
-        )}
+        {helperText && <p className={helperTextClassName}>{helperText}</p>}
       </React.Fragment>
     );
   }
@@ -263,13 +255,13 @@ TextEditor.propTypes = {
   placeholder: PropTypes.string,
   value: PropTypes.string,
   helperText: PropTypes.string,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func
 };
 
 TextEditor.defaultProps = {
   value: '',
   placeholder: '',
-  onChange() {},
+  onChange() {}
 };
 
 export default TextEditor;
