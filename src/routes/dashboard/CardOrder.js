@@ -38,11 +38,6 @@ class CardOrder extends React.PureComponent {
     { name: 'course_name', title: 'COURSE NAME' },
     { name: 'subscription_plan_name', title: 'SUBSCRIPTION' },
     {
-      name: 'payment.status',
-      title: 'PAYMENT STATUS',
-      getCellValue: row => row.payment.status
-    },
-    {
       name: 'payment.type',
       title: 'PAYMENT TYPE',
       getCellValue: row => row.payment.type

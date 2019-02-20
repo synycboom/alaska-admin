@@ -28,8 +28,10 @@ class ModOrderDetail extends React.PureComponent {
       omiseChargeId: '',
       omiseToken: '',
       paymentNo: '',
-      status: '',
-      type: ''
+      type: '',
+      date: '',
+      time: '',
+      amount: ''
     },
     subscription: null
   };
@@ -73,8 +75,10 @@ class ModOrderDetail extends React.PureComponent {
             omiseChargeId: data.payment.omise_charge_id,
             omiseToken: data.payment.omise_token,
             paymentNo: data.payment.payment_no,
-            status: data.payment.status,
-            type: data.payment.type
+            type: data.payment.type,
+            date: data.payment.date,
+            time: data.payment.time,
+            amount: data.payment.amount
           },
           subscription: data.subscription && {
             startDate: data.subscription.start_date,
@@ -309,18 +313,6 @@ class ModOrderDetail extends React.PureComponent {
             }}
             value={payment.type}
           />
-          <TextField
-            fullWidth
-            label="Status"
-            name="name"
-            margin="normal"
-            variant="filled"
-            InputLabelProps={{
-              readOnly: true,
-              shrink: true
-            }}
-            value={payment.status}
-          />
           {payment.type === 'omise' ? (
             <React.Fragment>
               <TextField
@@ -340,15 +332,39 @@ class ModOrderDetail extends React.PureComponent {
             <React.Fragment>
               <TextField
                 fullWidth
-                label="Expiration Time"
-                name="name"
+                label="Date"
+                name="date"
                 margin="normal"
                 variant="filled"
                 InputLabelProps={{
                   readOnly: true,
                   shrink: true
                 }}
-                value={payment.expirationTime}
+                value={payment.date}
+              />
+              <TextField
+                fullWidth
+                label="Time"
+                name="time"
+                margin="normal"
+                variant="filled"
+                InputLabelProps={{
+                  readOnly: true,
+                  shrink: true
+                }}
+                value={payment.time}
+              />
+              <TextField
+                fullWidth
+                label="Amount"
+                name="amount"
+                margin="normal"
+                variant="filled"
+                InputLabelProps={{
+                  readOnly: true,
+                  shrink: true
+                }}
+                value={payment.amount}
               />
               <img
                 width="500"
@@ -357,7 +373,7 @@ class ModOrderDetail extends React.PureComponent {
               />
             </React.Fragment>
           )}
-          {payment.status === 'successful' && !subscription && (
+          {!subscription && (
             <LoadingButton
               fullWidth
               variant="contained"
